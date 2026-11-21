@@ -1,0 +1,1097 @@
+<title>Komplexe Zahlen Lernzettel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: eine Lesespalte wie ein Rechenblatt, Kästchenraster als Grundmotiv; Re = blau, Im = magenta durchgehend */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #17202b;
+  --muted: #586474;
+  --line: #d6dde6;
+  --grid: #e5eaf0;
+  --re: #1f5fa8;
+  --im: #b0386c;
+  --ok: #23774a;
+  --warn: #9a5800;
+  --tint: rgba(31, 95, 168, .10);
+  --warn-tint: rgba(154, 88, 0, .09);
+  --ok-tint: rgba(35, 119, 74, .09);
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --surface: #161d26; --ink: #e5eaf1; --muted: #9aa6b5; --line: #2b3542; --grid: #1e2732;
+    --re: #74aaea; --im: #e57fab; --ok: #6cc690; --warn: #e3a64e;
+    --tint: rgba(116, 170, 234, .13); --warn-tint: rgba(227, 166, 78, .11); --ok-tint: rgba(108, 198, 144, .10);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #161d26; --ink: #e5eaf1; --muted: #9aa6b5; --line: #2b3542; --grid: #1e2732;
+  --re: #74aaea; --im: #e57fab; --ok: #6cc690; --warn: #e3a64e;
+  --tint: rgba(116, 170, 234, .13); --warn-tint: rgba(227, 166, 78, .11); --ok-tint: rgba(108, 198, 144, .10);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 4rem;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 800px; margin: 0 auto; }
+
+header.top { padding-block: 2.5rem 1.5rem; }
+.eyebrow { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; line-height: 1.2; }
+h1 { font-size: clamp(2rem, 6vw, 2.9rem); margin: .4rem 0 .8rem; letter-spacing: -.01em; }
+h1 .re { color: var(--re); } h1 .im { color: var(--im); }
+.lead { font-size: 1.08rem; color: var(--muted); max-width: 62ch; margin: 0; }
+.lead strong { color: var(--ink); }
+
+nav.toc {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  padding: .55rem max(16px, env(safe-area-inset-left, 0px));
+}
+nav.toc ul { list-style: none; display: flex; gap: .4rem; margin: 0 auto; padding: 0; max-width: 800px; overflow-x: auto; scrollbar-width: none; }
+nav.toc ul::-webkit-scrollbar { display: none; }
+nav.toc a {
+  display: inline-block; white-space: nowrap; text-decoration: none; color: var(--ink);
+  font-size: .85rem; font-weight: 500; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+}
+nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--re); color: var(--re); outline: none; }
+nav.toc a .p { font-family: var(--font-mono); color: var(--muted); font-size: .75rem; margin-left: .3rem; }
+
+section { padding-top: 2.6rem; scroll-margin-top: 3.4rem; }
+section > h2 { font-size: 1.65rem; margin: 0 0 .3rem; display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.tag { font-family: var(--font-mono); font-size: .75rem; font-weight: 500; color: var(--re); background: var(--tint); padding: .15rem .5rem; border-radius: 4px; letter-spacing: .02em; }
+h3 { font-size: 1.15rem; margin: 1.8rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .3rem; }
+p { margin: .6rem 0; }
+.muted { color: var(--muted); }
+a { color: var(--re); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.15rem; margin: 1rem 0; }
+.recipe { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1.15rem .9rem 1.15rem; margin: 1rem 0; }
+.recipe h4 { margin-top: .2rem; font-size: .8rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--re); }
+.recipe ol { margin: .3rem 0 .2rem; padding-left: 1.3rem; display: grid; gap: .35rem; }
+.trap { background: var(--warn-tint); border-radius: 10px; padding: .8rem 1.15rem; margin: 1rem 0; }
+.trap h4 { margin-top: .1rem; font-size: .8rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--warn); }
+.trap ul { margin: .3rem 0; padding-left: 1.2rem; display: grid; gap: .3rem; }
+.good { background: var(--ok-tint); border-radius: 10px; padding: .8rem 1.15rem; margin: 1rem 0; }
+.good h4 { margin-top: .1rem; font-size: .8rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--ok); }
+
+.worked { border-left: 3px solid var(--re); padding: .2rem 0 .2rem 1rem; margin: 1rem 0; }
+.worked .src { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+.step { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); gap: .5rem; margin: .7rem 0; }
+.step .n { font-family: var(--font-mono); font-size: .8rem; color: var(--re); padding-top: .15rem; }
+
+main p, main li, .step > div, summary .q, .kv dd { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding-block: .1rem; }
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: .15rem 0; margin: .5rem 0 !important; }
+
+details.ex { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin: .7rem 0; }
+details.ex > summary {
+  cursor: pointer; list-style: none; padding: .8rem 1.1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .8rem; align-items: center;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary .q { min-width: 0; }
+details.ex > summary .src { display: block; font-family: var(--font-mono); font-size: .75rem; color: var(--muted); }
+details.ex > summary .btn { font-size: .78rem; font-weight: 600; color: var(--re); border: 1px solid var(--line); border-radius: 999px; padding: .2rem .65rem; white-space: nowrap; }
+details.ex[open] > summary .btn::after { content: " ▴"; }
+details.ex:not([open]) > summary .btn::after { content: " ▾"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--re); outline-offset: 2px; border-radius: 10px; }
+details.ex .sol { padding: 0 1.1rem 1rem; border-top: 1px dashed var(--line); }
+.result { display: inline-block; background: var(--tint); border-radius: 6px; padding: .1rem .5rem; }
+
+.tablewrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+th { font-family: var(--font-mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; background: color-mix(in srgb, var(--grid) 60%, transparent); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar { height: 8px; border-radius: 4px; background: var(--re); display: block; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: start; }
+.two > * { min-width: 0; }
+figure { margin: 1rem 0; }
+figcaption { font-size: .85rem; color: var(--muted); margin-top: .3rem; }
+
+svg.plane { width: 100%; max-width: 420px; height: auto; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+svg .g { stroke: var(--grid); stroke-width: 1; }
+svg .ax { stroke: var(--muted); stroke-width: 1.3; }
+svg .axh { fill: var(--muted); }
+svg .t { fill: var(--muted); font: 11px var(--font-mono); }
+svg .lre { fill: var(--re); font: 600 13px var(--font-display); }
+svg .lim { fill: var(--im); font: 600 13px var(--font-display); }
+svg .fill { fill: var(--tint); stroke: none; }
+svg .hl { stroke: var(--re); stroke-width: 1.2; opacity: .45; }
+svg .edge { fill: none; stroke: var(--re); stroke-width: 2.4; }
+svg .edge.dash { stroke-dasharray: 7 5; }
+svg .faint { opacity: .45; }
+svg .pt { fill: var(--ink); }
+svg .pl { fill: var(--ink); font: 500 12px var(--font-body); }
+svg .pl.re { fill: var(--re); } svg .pl.im { fill: var(--im); }
+svg .note { fill: var(--re); font: 600 13px var(--font-body); }
+svg .radius { stroke: var(--ink); stroke-width: 1.3; stroke-dasharray: 3 3; }
+svg .radius.re { stroke: var(--re); } svg .radius.im { stroke: var(--im); }
+svg .vec { stroke: var(--ink); stroke-width: 2.2; }
+svg .arc { fill: none; stroke: var(--ink); stroke-width: 1.3; }
+svg .poly { fill: none; stroke: var(--im); stroke-width: 1.6; }
+svg .rootpt { fill: var(--im); }
+svg .zpt { fill: var(--re); }
+
+.legend { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .85rem; color: var(--muted); margin: .4rem 0; }
+.legend span::before { content: ""; display: inline-block; width: 22px; height: 0; vertical-align: middle; margin-right: .4rem; border-top: 2.4px solid var(--re); }
+.legend .d::before { border-top-style: dashed; }
+
+/* Rechner */
+.calc { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.15rem; }
+.calc .inputs { display: flex; flex-wrap: wrap; gap: .8rem 1rem; align-items: end; }
+.calc label { display: grid; gap: .2rem; font-size: .8rem; font-family: var(--font-mono); color: var(--muted); }
+.calc input { font: 500 1rem var(--font-mono); width: 6.5rem; padding: .4rem .55rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.calc input:focus-visible { outline: 2px solid var(--re); outline-offset: 1px; }
+.calc .presets { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+.calc button { font: 500 .8rem var(--font-body); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: .3rem .7rem; cursor: pointer; }
+.calc button:hover, .calc button:focus-visible { border-color: var(--re); color: var(--re); outline: none; }
+.calc .out { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.calc .out > * { min-width: 0; }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .25rem .8rem; font-family: var(--font-mono); font-size: .88rem; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; overflow-wrap: anywhere; }
+.rootlist { font-family: var(--font-mono); font-size: .85rem; font-variant-numeric: tabular-nums; margin: .6rem 0 0; padding-left: 0; list-style: none; display: grid; gap: .2rem; }
+.rootlist li { overflow-wrap: anywhere; }
+#calc-plot { width: 100%; max-width: 340px; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+
+.checklist { list-style: none; padding: 0; display: grid; gap: .45rem; }
+.checklist li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: .5rem; align-items: start; }
+.checklist input { width: 1.05rem; height: 1.05rem; margin-top: .25rem; accent-color: var(--re); }
+
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .85rem; color: var(--muted); }
+
+@media (max-width: 520px) {
+  body { font-size: 15.5px; }
+  .step { grid-template-columns: 1.2rem minmax(0, 1fr); }
+  details.ex > summary { grid-template-columns: minmax(0, 1fr); }
+  details.ex > summary .btn { justify-self: start; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+  svg: { fontCache: "global" },
+  options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Technische Mathematik · Aufgabe 1 · Probeklausuren 2024 – 2026</div>
+  <h1>Komplexe Zahlen <span class="re">Re</span> + <span class="im">i·Im</span></h1>
+  <p class="lead">Dein Lernzettel aus den Vorlesungsmitschriften und den fünf Probeklausuren. <strong>Aufgabe 1 ist in jeder Klausur gleich aufgebaut:</strong> sechs Teile a bis f, zusammen 45 Punkte. Wenn du die sechs Rezepte unten sicher kannst, hast du fast die Hälfte der Klausur.</p>
+</header>
+</div>
+
+<nav class="toc" aria-label="Abschnitte">
+  <ul>
+    <li><a href="#ueberblick">Überblick</a></li>
+    <li><a href="#grundlagen">Grundlagen</a></li>
+    <li><a href="#a-berechnen">a Berechnen<span class="p">6P</span></a></li>
+    <li><a href="#b-euler">b Euler<span class="p">6P</span></a></li>
+    <li><a href="#c-linearfaktoren">c Linearfaktoren<span class="p">15P</span></a></li>
+    <li><a href="#d-teilmengen">d Teilmengen<span class="p">6P</span></a></li>
+    <li><a href="#e-eigenschaften">e Eigenschaften<span class="p">6P</span></a></li>
+    <li><a href="#f-wurzeln">f Wurzeln<span class="p">6P</span></a></li>
+    <li><a href="#rechner">Rechner</a></li>
+    <li><a href="#a4-zettel">A4-Zettel</a></li>
+    <li><a href="#lernplan">Lernplan</a></li>
+  </ul>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================================================== ÜBERBLICK -->
+<section id="ueberblick">
+  <h2>So sieht Aufgabe 1 aus</h2>
+  <p>Alle fünf Probeklausuren (28.03.2024, 21.06.2024, 11.12.2024, 04.04.2025, 28.03.2026) haben exakt dieselben sechs Teilaufgaben. Nur die Zahlen ändern sich.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Teil</th><th>Was verlangt wird</th><th class="num">Punkte</th><th style="width:28%">Gewicht</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#a-berechnen">a</a></td><td>Ausdruck vereinfachen, Ergebnis kartesisch <em>und</em> in Polarform</td><td class="num">6</td><td><span class="bar" style="width:40%"></span></td></tr>
+      <tr><td><a href="#b-euler">b</a></td><td>Mit der Euler-Formel eine Identität beweisen (Additionstheorem, Moivre)</td><td class="num">6</td><td><span class="bar" style="width:40%"></span></td></tr>
+      <tr><td><a href="#c-linearfaktoren">c</a></td><td>Komplexes Polynom in Linearfaktoren zerlegen</td><td class="num">15</td><td><span class="bar" style="width:100%"></span></td></tr>
+      <tr><td><a href="#d-teilmengen">d</a></td><td>Teilmenge von ℂ skizzieren (Kreis, Halbebene, Parabel)</td><td class="num">6</td><td><span class="bar" style="width:40%"></span></td></tr>
+      <tr><td><a href="#e-eigenschaften">e</a></td><td>„Für welche z gilt …?“ – zwei Gleichungen lösen</td><td class="num">6</td><td><span class="bar" style="width:40%"></span></td></tr>
+      <tr><td><a href="#f-wurzeln">f</a></td><td>Alle Lösungen von \(z^n = a\) bestimmen</td><td class="num">6</td><td><span class="bar" style="width:40%"></span></td></tr>
+      <tr><td></td><td><strong>Summe Aufgabe 1</strong></td><td class="num"><strong>45</strong></td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="good">
+    <h4>Warum sich das lohnt</h4>
+    <p>In der Klausur vom 28.03.2026 waren insgesamt 130 Punkte erreichbar, zum Bestehen brauchst du 50 %. Aufgabe 1 allein bringt 45 Punkte. Komplexe Zahlen sind außerdem der planbarste Teil: Die Aufgabentypen wiederholen sich wörtlich.</p>
+  </div>
+
+  <div class="trap">
+    <h4>Spielregeln aus dem Deckblatt</h4>
+    <ul>
+      <li><strong>Rechenweg zählt.</strong> Ergebnisse ohne passende Rechnung gibt es nicht. Ansätze bringen Punkte.</li>
+      <li><strong>Exakt bleiben.</strong> \(\sqrt2\), \(\tfrac{\pi}{3}\), \(\sqrt[5]{4}\) <em>nicht</em> in Dezimalzahlen umrechnen, das wird als „Unsauberkeit“ gewertet. Taschenrechner auf Bogenmaß.</li>
+      <li><strong>Ergebnisse vereinfachen</strong>, soweit möglich. Formal sauber und einspaltig schreiben.</li>
+      <li><strong>Hilfsmittel:</strong> Taschenrechner und ein beidseitig beschriebenes A4-Blatt. Vorschlag für den Komplex-Teil: <a href="#a4-zettel">A4-Zettel</a>.</li>
+      <li>Im Anhang der Klausur gibt es eine Formelsammlung mit einem Kasten „Komplexe Zahlen“: Darstellungen \(x+iy = r e^{i\varphi}\), Re/Im über \(\bar z\), \(|z|\), \(\arg z = \arctan\frac{y}{x}\,(+\pi)\) und die Euler-Formel samt \(\cos\)/\(\sin\) in e-Form. <strong>Nicht</strong> drin sind die sin/cos-Wertetabelle, die pq-Formel und die Wurzelformel für \(z^n=a\).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================================================== GRUNDLAGEN -->
+<section id="grundlagen">
+  <h2>Grundlagen in kompakt</h2>
+  <p>Das brauchst du in jeder Teilaufgabe. Alles stammt aus deinen Mitschriften.</p>
+
+  <h3>Definition und kartesische Form</h3>
+  <p>\(i\) ist definiert durch \(i\cdot i = -1\). Jede komplexe Zahl hat die Form</p>
+  \[ z = x + iy,\qquad x = \mathrm{Re}(z) \text{ (Realteil)},\quad y = \mathrm{Im}(z) \text{ (Imaginärteil)},\quad x,y\in\mathbb R. \]
+  <p>Achtung: Der Imaginärteil ist die <em>reelle</em> Zahl \(y\), nicht \(iy\). Bei \(z=2+3i\) ist \(\mathrm{Im}(z)=3\).</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Operation</th><th>Regel</th></tr></thead>
+    <tbody>
+      <tr><td>Addition</td><td>\((a+ib)+(x+iy) = (a+x) + i(b+y)\)</td></tr>
+      <tr><td>Multiplikation</td><td>\((a+ib)(x+iy) = (ax-by) + i(ay+bx)\) &nbsp;– einfach ausmultiplizieren und \(i^2=-1\)</td></tr>
+      <tr><td>Division</td><td>mit der Konjugierten des Nenners erweitern: \(\dfrac{z}{c} = \dfrac{z\cdot\bar c}{c\cdot\bar c} = \dfrac{z\cdot\bar c}{|c|^2}\) &nbsp;– der Nenner wird reell</td></tr>
+      <tr><td>Potenzen von \(i\)</td><td>\(i^2=-1,\; i^3=-i,\; i^4=1,\; i^5=i,\;\dots\qquad \dfrac1i = -i\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="worked">
+    <div class="src">Beispiel aus der Vorlesung</div>
+    \[ \frac{4+3i}{-2+i} = \frac{(4+3i)(-2-i)}{(-2+i)(-2-i)} = \frac{-8-4i-6i-3i^2}{4+1} = \frac{-5-10i}{5} = -1-2i \]
+  </div>
+
+  <h3>Konjugation und Betrag</h3>
+  <div class="two">
+    <div>
+      \[ \bar z = x - iy \quad\text{(Spiegelung an der reellen Achse)} \]
+      \[ z+\bar z = 2\,\mathrm{Re}(z),\qquad z-\bar z = 2i\,\mathrm{Im}(z) \]
+      \[ z\cdot\bar z = x^2+y^2 = |z|^2 \]
+    </div>
+    <div>
+      \[ |z| = r = \sqrt{x^2+y^2} = \sqrt{z\bar z} \]
+      \[ \overline{z_1 z_2} = \bar z_1\,\bar z_2,\quad \overline{z_1+z_2}=\bar z_1+\bar z_2,\quad \bar{\bar z}=z \]
+      \[ z=\bar z \iff z\in\mathbb R \]
+    </div>
+  </div>
+
+  <h3>Polarform</h3>
+  <div class="two">
+    <figure>
+      {{SVG_POLAR}}
+      <figcaption>Der Zeiger von 0 nach z hat die Länge r und den Winkel φ zur positiven reellen Achse.</figcaption>
+    </figure>
+    <div>
+      \[ z = x+iy = r(\cos\varphi + i\sin\varphi) = r\,e^{i\varphi} \]
+      <p><strong>Polar → kartesisch:</strong> \(x = r\cos\varphi,\; y = r\sin\varphi\)</p>
+      <p><strong>Kartesisch → polar:</strong> \(r = \sqrt{x^2+y^2}\), Winkel je nach Quadrant:</p>
+    </div>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Lage von z</th><th>Winkel \(\varphi\)</th></tr></thead>
+    <tbody>
+      <tr><td>Quadrant I oder IV (\(x&gt;0\))</td><td>\(\varphi = \arctan\frac{y}{x}\) &nbsp;(in IV negativ; für \([0,2\pi)\) noch \(+2\pi\))</td></tr>
+      <tr><td>Quadrant II oder III (\(x&lt;0\))</td><td>\(\varphi = \arctan\frac{y}{x} + \pi\)</td></tr>
+      <tr><td>auf der Im-Achse (\(x=0\))</td><td>\(y&gt;0:\ \varphi=\frac{\pi}{2}\qquad y&lt;0:\ \varphi=-\frac{\pi}{2} = \frac{3\pi}{2}\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Faustregel: Punkt immer erst grob skizzieren, dann den Winkel ablesen. Hauptwert ist \(\varphi\in[0,2\pi)\) oder \(\varphi\in(-\pi,\pi]\). Beides ist in der Klausur in Ordnung, solange es stimmt.</p>
+
+  <h3>Zahlen, die ständig vorkommen</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>kartesisch</th><th>polar</th><th>kartesisch</th><th>polar</th></tr></thead>
+    <tbody>
+      <tr><td>\(1\)</td><td>\(e^{i0}\)</td><td>\(-1\)</td><td>\(e^{i\pi} = e^{-i\pi} = e^{-3i\pi}\)</td></tr>
+      <tr><td>\(i\)</td><td>\(e^{i\pi/2}\)</td><td>\(-i\)</td><td>\(e^{-i\pi/2} = e^{i\,3\pi/2}\)</td></tr>
+      <tr><td>\(1+i\)</td><td>\(\sqrt2\,e^{i\pi/4}\)</td><td>\(-1+i\)</td><td>\(\sqrt2\,e^{i\,3\pi/4}\)</td></tr>
+      <tr><td>\(1-i\)</td><td>\(\sqrt2\,e^{-i\pi/4}\)</td><td>\(-1-i\)</td><td>\(\sqrt2\,e^{i\,5\pi/4} = \sqrt2\,e^{-i\,3\pi/4}\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Und diese drei Abkürzungen sparen in fast jeder Klausur Zeit:</p>
+  \[ (1+i)^2 = 2i,\qquad (1-i)^2 = (i-1)^2 = -2i,\qquad \frac{1+i}{1-i} = i \]
+
+  <h3>Wertetabelle sin / cos</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Grad</th><th>\(\varphi\)</th><th>\(\sin\varphi\)</th><th>\(\cos\varphi\)</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0°</td><td>\(0\)</td><td>\(\tfrac12\sqrt0 = 0\)</td><td>\(\tfrac12\sqrt4 = 1\)</td></tr>
+      <tr><td class="num">30°</td><td>\(\tfrac{\pi}{6}\)</td><td>\(\tfrac12\sqrt1 = \tfrac12\)</td><td>\(\tfrac12\sqrt3\)</td></tr>
+      <tr><td class="num">45°</td><td>\(\tfrac{\pi}{4}\)</td><td>\(\tfrac12\sqrt2\)</td><td>\(\tfrac12\sqrt2\)</td></tr>
+      <tr><td class="num">60°</td><td>\(\tfrac{\pi}{3}\)</td><td>\(\tfrac12\sqrt3\)</td><td>\(\tfrac12\sqrt1 = \tfrac12\)</td></tr>
+      <tr><td class="num">90°</td><td>\(\tfrac{\pi}{2}\)</td><td>\(\tfrac12\sqrt4 = 1\)</td><td>\(\tfrac12\sqrt0 = 0\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Merkregel aus der Vorlesung: sin zählt \(\tfrac12\sqrt0,\ \tfrac12\sqrt1,\ \dots,\ \tfrac12\sqrt4\) hoch, cos zählt dieselben Werte herunter.</p>
+
+  <h3>Euler-Formel und Rechnen in Polarform</h3>
+  \[ e^{i\varphi} = \cos\varphi + i\sin\varphi \qquad\Rightarrow\qquad \cos\varphi = \tfrac12\left(e^{i\varphi}+e^{-i\varphi}\right),\quad \sin\varphi = \tfrac{1}{2i}\left(e^{i\varphi}-e^{-i\varphi}\right) \]
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Operation</th><th>Polarform</th><th>Geometrisch</th></tr></thead>
+    <tbody>
+      <tr><td>Multiplizieren</td><td>\(r_1e^{i\varphi_1}\cdot r_2e^{i\varphi_2} = r_1r_2\,e^{i(\varphi_1+\varphi_2)}\)</td><td>Drehstreckung: Beträge mal, Winkel plus</td></tr>
+      <tr><td>Dividieren</td><td>\(\dfrac{r_1e^{i\varphi_1}}{r_2e^{i\varphi_2}} = \dfrac{r_1}{r_2}\,e^{i(\varphi_1-\varphi_2)}\)</td><td>Beträge geteilt, Winkel minus</td></tr>
+      <tr><td>Potenzieren</td><td>\((re^{i\varphi})^n = r^n e^{in\varphi}\)</td><td>Satz von Moivre</td></tr>
+      <tr><td>Konjugieren</td><td>\(\overline{re^{i\varphi}} = re^{-i\varphi}\)</td><td>Winkel umdrehen</td></tr>
+      <tr><td>Periode</td><td>\(e^{i(\varphi+2\pi k)} = e^{i\varphi},\ k\in\mathbb Z\)</td><td>volle Umdrehung ändert nichts</td></tr>
+      <tr><td>Mal \(i\) / mal \(-1\)</td><td>\(i = e^{i\pi/2},\ -1 = e^{i\pi}\)</td><td>Drehung um 90° / 180°</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><strong>Faustregel:</strong> Summen und Differenzen rechnest du kartesisch. Produkte, Quotienten und Potenzen rechnest du polar.</p>
+</section>
+
+<!-- ===================================================== A -->
+<section id="a-berechnen">
+  <h2>a · Ausdruck berechnen <span class="tag">6 P · 5 von 5 Klausuren</span></h2>
+  <p>Gefragt ist immer: „Vereinfachen Sie … und geben Sie das Ergebnis in <em>kartesischen</em> und <em>Polarkoordinaten</em> an.“ Die Ergebnisse sind bisher immer glatt ausgegangen (z. B. \(i\), \(2i\), \(-1-i\)). Wenn bei dir etwas Krummes herauskommt, such den Fehler.</p>
+
+  <div class="recipe">
+    <h4>Rezept</h4>
+    <ol>
+      <li>Jeden Baustein einzeln vereinfachen: Klammern ausmultiplizieren, Nenner zusammenfassen, \(e^{-3i\pi} = -1\) usw.</li>
+      <li>Kartesische Bausteine in Polarform umwandeln (Tabelle oben). Beträge und Winkel getrennt sammeln.</li>
+      <li>Beträge multiplizieren bzw. dividieren, Winkel addieren bzw. subtrahieren. Potenzen: \((re^{i\varphi})^n = r^ne^{in\varphi}\), auch für negative \(n\).</li>
+      <li>Winkel auf den Hauptwert bringen und das Ergebnis in <strong>beiden</strong> Formen hinschreiben.</li>
+    </ol>
+  </div>
+
+  <div class="trap">
+    <h4>Typische Fehler</h4>
+    <ul>
+      <li>Nur eine Form angegeben. Es werden ausdrücklich beide verlangt.</li>
+      <li>Negative Hochzahl: \(\bigl(\sqrt[4]{2}\,e^{-i\pi/8}\bigr)^{-2} = 2^{-1/2}\,e^{+i\pi/4}\). Sowohl der Betrag als auch der Winkel werden mit \(-2\) multipliziert.</li>
+      <li>\(\sqrt{32} = 4\sqrt2\) und \(\sqrt[4]{2}^{\,2} = \sqrt2\) nicht übersehen.</li>
+      <li>Winkel im falschen Quadranten, z. B. \(-1-i\) mit \(\pi/4\) statt \(5\pi/4\).</li>
+    </ul>
+  </div>
+
+  <h3>Vorgerechnet</h3>
+  <div class="worked">
+    <div class="src">Klausur 04.04.2025 · a</div>
+    \[ \frac{16}{i\,(1-i)}\cdot\left(2^{-1}e^{i\frac{\pi}{2}}\right)^3 \]
+    <div class="step"><span class="n">1</span><div>Nenner vereinfachen: \(i(1-i) = i - i^2 = 1+i\). Damit ist \(\dfrac{16}{1+i} = \dfrac{16(1-i)}{(1+i)(1-i)} = \dfrac{16(1-i)}{2} = 8-8i\).</div></div>
+    <div class="step"><span class="n">2</span><div>Potenz in Polarform: \(\left(2^{-1}e^{i\pi/2}\right)^3 = 2^{-3}e^{i\,3\pi/2} = \tfrac18\cdot(-i) = -\tfrac{i}{8}\).</div></div>
+    <div class="step"><span class="n">3</span><div>Multiplizieren: \((8-8i)\cdot\left(-\tfrac{i}{8}\right) = (1-i)(-i) = -i + i^2 = -1-i\).</div></div>
+    <div class="step"><span class="n">4</span><div>Polarform: \(-1-i\) liegt im III. Quadranten, \(r=\sqrt{1+1}=\sqrt2\), \(\varphi = \arctan\frac{-1}{-1}+\pi = \frac{\pi}{4}+\pi = \frac{5\pi}{4}\).</div></div>
+    <p>Ergebnis: <span class="result">\(-1-i = \sqrt2\,e^{i\,5\pi/4}\;(=\sqrt2\,e^{-i\,3\pi/4})\)</span></p>
+  </div>
+
+  <h3>Üben mit den anderen Klausuren</h3>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · a</span>\(\dfrac{1+i}{1-i} - i\cdot e^{-3i\pi}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\dfrac{1+i}{1-i} = \dfrac{(1+i)^2}{(1-i)(1+i)} = \dfrac{2i}{2} = i\)</p>
+      <p>\(e^{-3i\pi} = \cos(-3\pi) + i\sin(-3\pi) = -1 + 0i = -1\)</p>
+      <p>\(i - i\cdot(-1) = 2i\). Ergebnis: <span class="result">\(2i = 2\,e^{i\pi/2}\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · a</span>\(\dfrac{4i - 2(1+i)}{2i\cdot e^{-i\frac{\pi}{4}}}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Zähler: \(4i - 2 - 2i = -2+2i\). Das liegt im II. Quadranten: \(r=\sqrt{8}=2\sqrt2\), \(\varphi = \frac{3\pi}{4}\), also \(-2+2i = 2\sqrt2\,e^{i\,3\pi/4}\).</p>
+      <p>Nenner: \(2i\cdot e^{-i\pi/4} = 2e^{i\pi/2}e^{-i\pi/4} = 2e^{i\pi/4}\).</p>
+      \[ \frac{2\sqrt2\,e^{i\,3\pi/4}}{2\,e^{i\pi/4}} = \sqrt2\,e^{i(3\pi/4-\pi/4)} = \sqrt2\,e^{i\pi/2} \]
+      <p>Ergebnis: <span class="result">\(\sqrt2\,i = \sqrt2\,e^{i\pi/2}\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 · a</span>\(\dfrac{2(2-i)+6i}{\sqrt2\cdot i}\cdot\left(\sqrt[4]{2}\cdot e^{-i\frac{\pi}{8}}\right)^2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Zähler: \(4-2i+6i = 4+4i = 4(1+i) = 4\sqrt2\,e^{i\pi/4}\). Nenner: \(\sqrt2\,i = \sqrt2\,e^{i\pi/2}\).</p>
+      <p>Bruch: \(\dfrac{4\sqrt2\,e^{i\pi/4}}{\sqrt2\,e^{i\pi/2}} = 4\,e^{-i\pi/4}\).</p>
+      <p>Potenz: \(\left(2^{1/4}e^{-i\pi/8}\right)^2 = 2^{1/2}e^{-i\pi/4} = \sqrt2\,e^{-i\pi/4}\).</p>
+      <p>Produkt: \(4\sqrt2\,e^{-i\pi/2}\). Ergebnis: <span class="result">\(-4\sqrt2\,i = 4\sqrt2\,e^{-i\pi/2} = 4\sqrt2\,e^{i\,3\pi/2}\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · a</span>\(\sqrt{32}\cdot\dfrac{\sqrt2\cdot i}{2(2-i)+6i}\cdot\left(\sqrt[4]{2}\cdot e^{-i\frac{\pi}{8}}\right)^{-2}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\sqrt{32} = 4\sqrt2\). Nenner: \(4+4i = 4\sqrt2\,e^{i\pi/4}\). Zähler: \(\sqrt2\,i = \sqrt2\,e^{i\pi/2}\).</p>
+      <p>\(4\sqrt2\cdot\dfrac{\sqrt2\,e^{i\pi/2}}{4\sqrt2\,e^{i\pi/4}} = \sqrt2\,e^{i\pi/4}\)</p>
+      <p>Negative Potenz: \(\left(2^{1/4}e^{-i\pi/8}\right)^{-2} = 2^{-1/2}e^{+i\pi/4}\).</p>
+      <p>Produkt: \(\sqrt2\cdot 2^{-1/2}\cdot e^{i(\pi/4+\pi/4)} = 1\cdot e^{i\pi/2}\). Ergebnis: <span class="result">\(i = e^{i\pi/2}\)</span></p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== B -->
+<section id="b-euler">
+  <h2>b · Beweis mit der Euler-Formel <span class="tag">6 P · 5 von 5 Klausuren</span></h2>
+  <p>Fast immer ein Additionstheorem, einmal die Formel von Moivre, einmal \(1/e^{ix}\). Das Vorgehen ist ein reines Schema. Die Umrechnungsformeln für \(\cos\) und \(\sin\) stehen in der Formelsammlung im Anhang.</p>
+
+  <div class="recipe">
+    <h4>Rezept für Additionstheoreme</h4>
+    <ol>
+      <li>Mit der <strong>rechten</strong> Seite anfangen (so steht es auch im Hinweis).</li>
+      <li>Jedes \(\cos\) durch \(\tfrac12(e^{i\cdot}+e^{-i\cdot})\) und jedes \(\sin\) durch \(\tfrac{1}{2i}(e^{i\cdot}-e^{-i\cdot})\) ersetzen.</li>
+      <li>Vorfaktoren zusammenfassen: \(\tfrac12\cdot\tfrac12 = \tfrac14\), \(\;\tfrac12\cdot\tfrac1{2i} = \tfrac1{4i}\), \(\;\tfrac1{2i}\cdot\tfrac1{2i} = \tfrac{1}{4i^2} = -\tfrac14\).</li>
+      <li>Ausmultiplizieren (je 4 Terme) mit \(e^{ia}e^{ib} = e^{i(a+b)}\). Ordentlich untereinander schreiben.</li>
+      <li>Gleiche Terme zusammenfassen bzw. wegstreichen, Rest wieder mit Euler rückwärts in \(\sin\)/\(\cos\) übersetzen.</li>
+    </ol>
+  </div>
+
+  <h3>Vorgerechnet</h3>
+  <div class="worked">
+    <div class="src">Klausur 11.12.2024 · b</div>
+    \[ \text{Zeige: }\cos(a+b) = \cos a\cos b - \sin a\sin b \]
+    <div class="step"><span class="n">1</span><div>Erster Summand:
+      \[ \cos a\cos b = \tfrac14\left(e^{ia}+e^{-ia}\right)\left(e^{ib}+e^{-ib}\right) = \tfrac14\left(e^{i(a+b)} + e^{i(a-b)} + e^{-i(a-b)} + e^{-i(a+b)}\right) \]</div></div>
+    <div class="step"><span class="n">2</span><div>Zweiter Summand (Vorfaktor \(\tfrac{1}{2i}\cdot\tfrac1{2i} = -\tfrac14\)):
+      \[ \sin a\sin b = -\tfrac14\left(e^{ia}-e^{-ia}\right)\left(e^{ib}-e^{-ib}\right) = -\tfrac14\left(e^{i(a+b)} - e^{i(a-b)} - e^{-i(a-b)} + e^{-i(a+b)}\right) \]</div></div>
+    <div class="step"><span class="n">3</span><div>Differenz bilden, die gemischten Terme \(e^{\pm i(a-b)}\) heben sich weg:
+      \[ \cos a\cos b - \sin a\sin b = \tfrac14\left(2e^{i(a+b)} + 2e^{-i(a+b)}\right) = \tfrac12\left(e^{i(a+b)} + e^{-i(a+b)}\right) = \cos(a+b)\quad\checkmark \]</div></div>
+  </div>
+
+  <h3>Üben</h3>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · b</span>\(\sin(x-y) = \sin x\cos y - \sin y\cos x\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Vorfaktor jeweils \(\tfrac{1}{2i}\cdot\tfrac12 = \tfrac{1}{4i}\).</p>
+      \[ \sin x\cos y = \tfrac{1}{4i}\left(e^{i(x+y)} + e^{i(x-y)} - e^{-i(x-y)} - e^{-i(x+y)}\right) \]
+      \[ \sin y\cos x = \tfrac{1}{4i}\left(e^{i(x+y)} - e^{i(x-y)} + e^{-i(x-y)} - e^{-i(x+y)}\right) \]
+      <p class="muted">(Beim zweiten: \(e^{iy}e^{-ix} = e^{-i(x-y)}\) und \(-e^{-iy}e^{ix} = -e^{i(x-y)}\).)</p>
+      \[ \text{Differenz} = \tfrac{1}{4i}\left(2e^{i(x-y)} - 2e^{-i(x-y)}\right) = \tfrac{1}{2i}\left(e^{i(x-y)} - e^{-i(x-y)}\right) = \sin(x-y)\quad\checkmark \]
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">04.04.2025 · b (und Vorlesung)</span>\(\sin(a+b) = \sin a\cos b + \cos a\sin b\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <div class="trap" style="margin-top:.8rem">
+        <h4>Achtung, Druckfehler in der Klausur</h4>
+        <p>In der Klausur vom 04.04.2025 steht \(\sin(a+b) = \sin a\cos b - \cos a\sin b\) (mit Minus). Das ist falsch: Die rechte Seite ergibt \(\sin(a-b)\). Wenn dir so etwas passiert, rechne sauber und schreib dazu, was tatsächlich herauskommt. Das bringt die Punkte.</p>
+      </div>
+      \[ \sin a\cos b = \tfrac{1}{4i}\left(e^{i(a+b)} + e^{i(a-b)} - e^{-i(a-b)} - e^{-i(a+b)}\right) \]
+      \[ \cos a\sin b = \tfrac{1}{4i}\left(e^{i(a+b)} - e^{i(a-b)} + e^{-i(a-b)} - e^{-i(a+b)}\right) \]
+      <p><strong>Summe:</strong> \(\tfrac{1}{4i}\left(2e^{i(a+b)} - 2e^{-i(a+b)}\right) = \tfrac{1}{2i}\left(e^{i(a+b)} - e^{-i(a+b)}\right) = \sin(a+b)\) ✓</p>
+      <p><strong>Differenz:</strong> \(\tfrac{1}{4i}\left(2e^{i(a-b)} - 2e^{-i(a-b)}\right) = \sin(a-b)\). Die Version mit Minus aus der Klausur ist also \(\sin(a-b)\).</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 · b</span>Moivre: \((\cos x + i\sin x)^n = \cos(nx) + i\sin(nx)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      \[ (\cos x + i\sin x)^n \overset{\text{Euler}}{=} \left(e^{ix}\right)^n \overset{(a^b)^c = a^{bc}}{=} e^{inx} \overset{\text{Euler}}{=} \cos(nx) + i\sin(nx)\quad\checkmark \]
+      <p class="muted">Drei Zeilen, aber jede Umformung begründen (Euler-Formel, Potenzgesetz).</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · b</span>\(\dfrac{1}{\cos x + i\sin x} = \overline{\cos x + i\sin x}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      \[ \frac{1}{\cos x + i\sin x} = \frac{1}{e^{ix}} = e^{-ix} = \cos(-x) + i\sin(-x) = \cos x - i\sin x = \overline{\cos x + i\sin x}\quad\checkmark \]
+      <p class="muted">Benutzt: \(\cos\) ist gerade, \(\cos(-x)=\cos x\). \(\sin\) ist ungerade, \(\sin(-x) = -\sin x\).</p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== C -->
+<section id="c-linearfaktoren">
+  <h2>c · Linearfaktorzerlegung <span class="tag">15 P · 5 von 5 Klausuren</span></h2>
+  <p>Die dickste Teilaufgabe. Ein Polynom 3. Grades mit komplexen Koeffizienten, der Hinweis verrät eine reelle Nullstelle. Das Ziel ist \(P(z) = (z-z_1)(z-z_2)(z-z_3)\).</p>
+
+  <div class="recipe">
+    <h4>Rezept</h4>
+    <ol>
+      <li><strong>Reelle Nullstelle finden.</strong> Trick: Für reelles \(z\) sind \(z, z^2, z^3\) reell. Sortiere \(P(z)\) in einen Teil ohne \(i\) und einen Teil mit \(i\). Beide müssen einzeln null sein. Der \(i\)-Teil ist meist eine kleine quadratische Gleichung und liefert Kandidaten. Prüfe sie im anderen Teil. (Raten mit \(\pm1, \pm2\) geht auch.)</li>
+      <li><strong>Abspalten</strong> mit Polynomdivision durch \((z-z_1)\) oder schneller mit dem Horner-Schema. Rest muss 0 sein.</li>
+      <li><strong>Quadratische Gleichung</strong> \(z^2+pz+q = 0\) mit der pq-Formel lösen: \(z = -\frac p2 \pm\sqrt{\left(\frac p2\right)^2 - q}\). Bei vielen Brüchen lieber \(z = \frac{-b\pm\sqrt{b^2-4c}}{2}\).</li>
+      <li><strong>Komplexe Wurzel kartesisch ziehen</strong> (unten). Ein \(\pm\) reicht, die zweite Wurzel ist das Negative.</li>
+      <li><strong>Probe mit Vieta:</strong> Für die quadratische Gleichung ist \(z_2+z_3 = -p\) und \(z_2\cdot z_3 = q\). Kostet 30 Sekunden.</li>
+      <li>Ergebnis hinschreiben: \(P(z) = (z-z_1)(z-z_2)(z-z_3)\). Vorzeichen in den Klammern prüfen.</li>
+    </ol>
+  </div>
+
+  <h3>Wurzel aus einer komplexen Zahl, kartesisch</h3>
+  <p>Gesucht ist \(\sqrt{a+ib}\), also \(x+iy\) mit \((x+iy)^2 = a+ib\). Das ist die Methode aus der Vorlesung (\(\sqrt{1+i}\), \(\sqrt{8-6i}\), \(\sqrt{-3-4i}\)).</p>
+  \[ (x+iy)^2 = x^2-y^2 + 2ixy \overset{!}{=} a+ib \quad\Rightarrow\quad \text{(I) } x^2-y^2 = a,\qquad \text{(II) } 2xy = b \]
+  <div class="step"><span class="n">1</span><div>Aus (II) das Vorzeichen merken: \(b&gt;0\) heißt, \(x,y\) haben gleiches Vorzeichen. \(b&lt;0\) heißt, entgegengesetzte Vorzeichen.</div></div>
+  <div class="step"><span class="n">2</span><div>(I) nach \(x^2\) umstellen, (II) quadrieren (\(x^2y^2 = b^2/4\)) und einsetzen. Das ergibt eine Gleichung in \(y^2\).</div></div>
+  <div class="step"><span class="n">3</span><div>Substituieren \(t = y^2 \ge 0\) und die negative Lösung für \(t\) verwerfen.</div></div>
+  <div class="step"><span class="n">4</span><div>\(y\), dann \(x\) bestimmen, mit dem Vorzeichen aus Schritt 1. Probe: \((x+iy)^2\) ausrechnen.</div></div>
+  <p class="muted">Schneller Check vorab: \(|x+iy|^2 = \sqrt{a^2+b^2}\), also \(x^2 + y^2 = \sqrt{a^2+b^2}\). Zusammen mit (I) ergibt das direkt \(x^2\) und \(y^2\). Bei \(\sqrt{-8+6i}\): \(x^2+y^2 = 10,\ x^2-y^2=-8 \Rightarrow x^2=1,\ y^2=9\).</p>
+
+  <h3>Vorgerechnet</h3>
+  <div class="worked">
+    <div class="src">Klausur 28.03.2024 · c</div>
+    \[ P(z) = z^3 + z^2 - 3z + 4iz - 3 + 4i \]
+    <div class="step"><span class="n">1</span><div><strong>Reelle Nullstelle.</strong> Sortieren: \(P(z) = \underbrace{(z^3 + z^2 - 3z - 3)}_{\text{ohne } i} + i\underbrace{(4z + 4)}_{\text{mit } i}\). Für reelles \(z\) muss \(4z+4 = 0\) sein, also \(z=-1\). Probe im anderen Teil: \(-1+1+3-3 = 0\) ✓. Damit \(z_1 = -1\).</div></div>
+    <div class="step"><span class="n">2</span><div><strong>Horner-Schema</strong> mit \(z_1=-1\). Koeffizienten: \(1,\ 1,\ -3+4i,\ -3+4i\).
+      <div class="tablewrap" style="margin:.6rem 0">
+      <table>
+        <thead><tr><th></th><th>\(z^3\)</th><th>\(z^2\)</th><th>\(z^1\)</th><th>\(z^0\)</th></tr></thead>
+        <tbody>
+          <tr><td></td><td>\(1\)</td><td>\(1\)</td><td>\(-3+4i\)</td><td>\(-3+4i\)</td></tr>
+          <tr><td>\(z_1=-1\)</td><td></td><td>\(-1\)</td><td>\(0\)</td><td>\(3-4i\)</td></tr>
+          <tr><td></td><td>\(1\)</td><td>\(0\)</td><td>\(-3+4i\)</td><td><strong>\(0\)</strong> = Rest</td></tr>
+        </tbody>
+      </table>
+      </div>
+      Die letzte Zeile ist das Restpolynom: \(z^2 + 0\cdot z + (-3+4i)\). Also \(P(z) = (z+1)(z^2 - 3 + 4i)\).</div></div>
+    <div class="step"><span class="n">3</span><div><strong>Quadratischer Teil:</strong> \(z^2 = 3-4i\), also \(z = \pm\sqrt{3-4i}\).</div></div>
+    <div class="step"><span class="n">4</span><div><strong>Nebenrechnung</strong> \((x+iy)^2 = 3-4i\): \(x^2-y^2 = 3\) und \(xy = -2\) (entgegengesetzte Vorzeichen).<br>
+      \(x^2 = y^2+3\) in \(x^2y^2 = 4\) einsetzen: \((y^2+3)y^2 = 4\), mit \(t=y^2\) wird das \(t^2+3t-4 = 0\), also \(t = 1\) oder \(t=-4\) (entfällt).<br>
+      \(y = \pm1\), dazu \(x = \mp2\). Damit \(\sqrt{3-4i} = \pm(2-i)\). Probe: \((2-i)^2 = 4-4i-1 = 3-4i\) ✓</div></div>
+    <p>Ergebnis: <span class="result">\(P(z) = (z+1)\,(z-2+i)\,(z+2-i)\)</span></p>
+  </div>
+
+  <h3>Üben</h3>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · c</span>\(P(z) = z^3 + (2+i)z^2 + (2+2i)z + 4\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>Sortieren:</strong> \(P(z) = (z^3 + 2z^2 + 2z + 4) + i(z^2 + 2z)\). Der \(i\)-Teil \(z(z+2) = 0\) liefert \(z=0\) oder \(z=-2\).</p>
+      <p>Probe: \(z=0\) gibt \(4 \ne 0\). \(z=-2\) gibt \(-8+8-4+4 = 0\) ✓. Damit \(z_1=-2\).</p>
+      <p><strong>Horner</strong> mit \(-2\): \(1 \mid 2+i \mid 2+2i \mid 4\) wird zu \(1 \mid i \mid 2 \mid 0\). Also \(z^2 + iz + 2\).</p>
+      <p><strong>pq-Formel</strong> (\(p = i,\ q=2\)): \(z = -\tfrac i2 \pm\sqrt{\left(\tfrac i2\right)^2 - 2} = -\tfrac i2\pm\sqrt{-\tfrac94} = -\tfrac i2 \pm \tfrac{3}{2}i\), also \(z_2 = i,\ z_3 = -2i\).</p>
+      <p>Vieta: \(i\cdot(-2i) = 2 = q\) ✓, \(i + (-2i) = -i = -p\) ✓</p>
+      <p>Ergebnis: <span class="result">\(P(z) = (z+2)(z-i)(z+2i)\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · c</span>\(P(z) = z^3 + (3-2i)z^2 + (1-4i)z - 1 - 2i\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>Sortieren:</strong> \(P(z) = (z^3 + 3z^2 + z - 1) + i(-2z^2 - 4z - 2)\). Der \(i\)-Teil ist \(-2(z+1)^2 = 0\), also \(z=-1\).</p>
+      <p>Probe: \(-1 + 3 - 1 - 1 = 0\) ✓. Damit \(z_1 = -1\).</p>
+      <p><strong>Horner</strong> mit \(-1\): \(1 \mid 3-2i \mid 1-4i \mid -1-2i\) wird zu \(1 \mid 2-2i \mid -1-2i \mid 0\). Also \(z^2 + (2-2i)z - 1 - 2i\).</p>
+      <p class="muted">Rechnung: \(3-2i-1 = 2-2i\). \((1-4i) + (-1)(2-2i) = -1-2i\). \((-1-2i) + (-1)(-1-2i) = 0\).</p>
+      <p><strong>pq-Formel</strong> mit \(\tfrac p2 = 1-i\): \(\left(\tfrac p2\right)^2 = (1-i)^2 = -2i\). Unter der Wurzel steht \(-2i - (-1-2i) = 1\).</p>
+      <p>\(z = -(1-i) \pm 1\), also \(z_2 = i,\ z_3 = -2+i\).</p>
+      <p>Vieta: \(i(-2+i) = -2i - 1 = q\) ✓</p>
+      <p>Ergebnis: <span class="result">\(P(z) = (z+1)(z-i)(z+2-i)\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">04.04.2025 · c</span>\(P(z) = z^3 - (2-i)z^2 + 3(1-i)z - 2(1-i)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>Ausmultiplizieren und sortieren:</strong> \(P(z) = (z^3 - 2z^2 + 3z - 2) + i(z^2 - 3z + 2)\).</p>
+      <p>Der \(i\)-Teil \(z^2-3z+2 = (z-1)(z-2) = 0\) liefert \(z=1\) oder \(z=2\). Probe: \(z=1\) gibt \(1-2+3-2 = 0\) ✓. \(z=2\) gibt \(8-8+6-2 = 4\) ✗. Damit \(z_1=1\).</p>
+      <p><strong>Horner</strong> mit \(1\): \(1 \mid -2+i \mid 3-3i \mid -2+2i\) wird zu \(1 \mid -1+i \mid 2-2i \mid 0\). Also \(z^2 + (-1+i)z + 2 - 2i\).</p>
+      <p><strong>abc-Formel</strong> (weniger Brüche): \(D = b^2 - 4c = (-1+i)^2 - 4(2-2i) = -2i - 8 + 8i = -8+6i\).</p>
+      <p>Nebenrechnung \(\sqrt{-8+6i}\): \(x^2-y^2 = -8\), \(xy = 3\) (gleiches Vorzeichen). \((y^2-8)y^2 = 9\), also \(t^2-8t-9=0\), \(t = 9\). Damit \(y=\pm3,\ x = \pm1\) und \(\sqrt D = \pm(1+3i)\).</p>
+      <p>\(z = \dfrac{(1-i) \pm (1+3i)}{2}\), also \(z_2 = \dfrac{2+2i}{2} = 1+i\) und \(z_3 = \dfrac{-4i}{2} = -2i\).</p>
+      <p>Vieta: \((1+i)(-2i) = -2i + 2 = 2-2i = c\) ✓</p>
+      <p>Ergebnis: <span class="result">\(P(z) = (z-1)(z-1-i)(z+2i)\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · c</span>\(P(z) = z^4 - 4z^3 + 5z^2 - 4z + 4\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Hier sind alle Koeffizienten reell und das Polynom hat Grad 4. Raten: \(P(2) = 16 - 32 + 20 - 8 + 4 = 0\) ✓</p>
+      <p><strong>Horner</strong> mit \(2\): \(1 \mid -4 \mid 5 \mid -4 \mid 4\) wird zu \(1 \mid -2 \mid 1 \mid -2 \mid 0\). Also \(z^3 - 2z^2 + z - 2\).</p>
+      <p>Nochmal \(z=2\): \(8 - 8 + 2 - 2 = 0\) ✓. Oder ausklammern: \(z^2(z-2) + (z-2) = (z-2)(z^2+1)\).</p>
+      <p>\(z^2+1 = 0\) liefert \(z = \pm i\).</p>
+      <p>Ergebnis: <span class="result">\(P(z) = (z-2)^2(z-i)(z+i)\)</span></p>
+      <div class="trap">
+        <h4>Hinweis in der Klausur stimmt nicht</h4>
+        <p>Dort steht „zwei einfache reelle Nullstellen“. Tatsächlich ist \(z=2\) eine <em>doppelte</em> Nullstelle, und \(z=1\) ist keine (\(P(1) = 2\)). Lass dich von so einem Hinweis nicht verunsichern: Wenn deine Probe stimmt, schreib dein Ergebnis hin und vermerke die Abweichung.</p>
+      </div>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">Vorlesung</span>\(P(z) = z^3 - (3+2i)z^2 + (5+8i)z - 3 - 6i\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(P(1) = 1 - 3 - 2i + 5 + 8i - 3 - 6i = 0\) ✓. Die Division ergibt \(z^2 - (2+2i)z + 3 + 6i\).</p>
+      <p>pq: \(z = 1+i\pm\sqrt{(1+i)^2 - 3 - 6i} = 1+i \pm\sqrt{-3-4i}\), mit \(\sqrt{-3-4i} = \pm(1-2i)\). Damit \(z_2 = 2-i\) und \(z_3 = 3i\).</p>
+      <p>Ergebnis: <span class="result">\(P(z) = (z-1)(z-2+i)(z-3i)\)</span></p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== D -->
+<section id="d-teilmengen">
+  <h2>d · Teilmengen skizzieren <span class="tag">6 P · 5 von 5 Klausuren</span></h2>
+  <p>Eine Bedingung an \(z\) wird zu einer Fläche in der Gaußschen Zahlenebene. Übersetze sie mit \(z = x+iy\) in \(x\) und \(y\) und erkenne die Grundform.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Bedingung</th><th>Bedeutung</th><th>Skizze</th></tr></thead>
+    <tbody>
+      <tr><td>\(|z - z_0| &lt; r\)</td><td>Abstand von \(z\) zu \(z_0\) kleiner als \(r\)</td><td>Kreisscheibe um \(z_0\), Radius \(r\), Rand gestrichelt</td></tr>
+      <tr><td>\(|z - z_0| \le r\)</td><td>wie oben, mit Rand</td><td>Rand durchgezogen</td></tr>
+      <tr><td>\(|z-z_0| &gt; r\) / \(\ge r\)</td><td>außerhalb des Kreises</td><td>alles außen schraffieren</td></tr>
+      <tr><td>\((\mathrm{Re}\,z)^2+(\mathrm{Im}\,z)^2 = x^2+y^2 = z\bar z = |z|^2\)</td><td>Abstand zum Ursprung zum Quadrat</td><td>Kreis um 0</td></tr>
+      <tr><td>\(\mathrm{Re}(z) &gt; a\)</td><td>\(x &gt; a\)</td><td>rechts der senkrechten Geraden \(x=a\)</td></tr>
+      <tr><td>\(\mathrm{Im}(z) &gt; b\)</td><td>\(y &gt; b\)</td><td>oberhalb der waagerechten Geraden \(y=b\)</td></tr>
+      <tr><td>\(\max(|x|,|y|)\le 1\)</td><td>\(|x|\le1\) und \(|y|\le1\)</td><td>Quadrat (Vorlesung)</td></tr>
+      <tr><td>Gleichung in \(x, y\)</td><td>nach \(y\) auflösen</td><td>Gerade, Parabel …</td></tr>
+      <tr><td>\(\land\) / \(\lor\)</td><td>und / oder</td><td>Schnittmenge / Vereinigung</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <h4>Typische Fehler</h4>
+    <ul>
+      <li><strong>Mittelpunkt mit falschem Vorzeichen.</strong> \(|z+2-i| = |z-(-2+i)|\). Der Mittelpunkt ist \(-2+i\), nicht \(2-i\). Immer erst in die Form \(|z - z_0|\) bringen.</li>
+      <li>\(&lt;\) oder \(&gt;\) heißt Rand gestrichelt (gehört nicht dazu). \(\le\) oder \(\ge\) heißt durchgezogen. Das schreibst du auch als Satz dazu.</li>
+      <li>Achsen nicht beschriftet (Re, Im), keine Skala, Mittelpunkt bzw. Scheitel nicht markiert.</li>
+    </ul>
+  </div>
+  <div class="legend"><span>Rand gehört dazu</span><span class="d">Rand gehört nicht dazu</span></div>
+
+  <h3>Vorgerechnet</h3>
+  <div class="worked">
+    <div class="src">Klausur 04.04.2025 · d</div>
+    \[ T = \left\{ z\in\mathbb C \;\middle|\; 4\cdot\mathrm{Im}(z) + 2 \ge (\mathrm{Re}(z))^2 - 2 \right\} \]
+    <div class="two">
+      <div>
+        <div class="step"><span class="n">1</span><div>Einsetzen: \(4y + 2 \ge x^2 - 2\).</div></div>
+        <div class="step"><span class="n">2</span><div>Nach \(y\) auflösen: \(4y \ge x^2 - 4\), also \(y \ge \tfrac14 x^2 - 1\).</div></div>
+        <div class="step"><span class="n">3</span><div>Randkurve ist die nach oben geöffnete Parabel mit Scheitel \((0\,|\,{-1})\) und Nullstellen \(x = \pm2\). Weitere Punkte: \((\pm4\,|\,3)\).</div></div>
+        <div class="step"><span class="n">4</span><div>\(y \ge\) bedeutet: Fläche <strong>oberhalb</strong> der Parabel, Rand gehört dazu (durchgezogen).</div></div>
+        <p class="muted">Probe mit einem Punkt: \(z=0\) gibt \(0 \ge -1\) ✓, liegt also in \(T\).</p>
+      </div>
+      <figure>{{SVG_D1}}</figure>
+    </div>
+  </div>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · d</span>\(T = \{z\in\mathbb C \mid 1 &gt; |z+2-i|\}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol two">
+      <div>
+        <p>Umschreiben: \(|z - (-2+i)| &lt; 1\).</p>
+        <p>Offene Kreisscheibe um <strong>\(-2+i\)</strong> (Punkt \((-2\,|\,1)\)) mit Radius 1. Der Rand gehört <em>nicht</em> dazu, er wird gestrichelt gezeichnet.</p>
+      </div>
+      <figure>{{SVG_D2}}</figure>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · d</span>\(T = \{z\in\mathbb C \mid 1 &gt; |z+2i| \land \mathrm{Re}(z) &gt; 0\}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol two">
+      <div>
+        <p>\(|z-(-2i)| &lt; 1\) ist die offene Kreisscheibe um \(-2i\) mit Radius 1.</p>
+        <p>\(\mathrm{Re}(z) &gt; 0\) ist die rechte Halbebene ohne die Im-Achse.</p>
+        <p>\(\land\) heißt Schnittmenge: die rechte Hälfte der Kreisscheibe, beide Ränder gestrichelt.</p>
+      </div>
+      <figure>{{SVG_D3}}</figure>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 · d</span>\(T = \{z\in\mathbb C \mid 1 &gt; |z-2i|\}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol two">
+      <div><p>Offene Kreisscheibe um \(2i\) (Punkt \((0\,|\,2)\)) mit Radius 1, Rand gestrichelt.</p></div>
+      <figure>{{SVG_D4}}</figure>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · d</span>\(T = \{z\in\mathbb C \mid 1 \le (\mathrm{Re}(z))^2 + (\mathrm{Im}(z))^2\}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol two">
+      <div>
+        <p>\(x^2 + y^2 \ge 1\), also \(|z| \ge 1\): Abstand zum Ursprung mindestens 1.</p>
+        <p>Das ist alles <strong>außerhalb</strong> des Einheitskreises. Der Kreis selbst gehört dazu (durchgezogen). Die Fläche ist unbeschränkt, das schreibst du dazu.</p>
+      </div>
+      <figure>{{SVG_D5}}</figure>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== E -->
+<section id="e-eigenschaften">
+  <h2>e · „Für welche z gilt …?“ <span class="tag">6 P · 5 von 5 Klausuren</span></h2>
+  <p>Zwei kleine Gleichungen mit \(z\), \(\bar z\) und \(|z|\). Die Antwort ist eine Menge: einzelne Zahlen (\(z\in\{0;\ 1-i\}\)) oder eine ganze Linie (alle \(z\) mit \(y = x\)).</p>
+
+  <div class="two">
+    <div class="recipe">
+      <h4>Methode A – geht immer</h4>
+      <ol>
+        <li>\(z = x+iy\) und \(\bar z = x-iy\) einsetzen.</li>
+        <li>Beide Seiten in „Realteil + \(i\)·Imaginärteil“ sortieren.</li>
+        <li>Realteile gleichsetzen und Imaginärteile gleichsetzen. Das sind zwei reelle Gleichungen.</li>
+        <li>Lösen und die Lösungsmenge angeben.</li>
+      </ol>
+    </div>
+    <div class="recipe">
+      <h4>Methode B – schneller</h4>
+      <ol>
+        <li>\(|z|^2 = z\bar z\) ersetzen.</li>
+        <li>Alles auf eine Seite bringen und \(z\) bzw. \(\bar z\) ausklammern.</li>
+        <li>Satz vom Nullprodukt: \(z = 0\) <em>oder</em> die Klammer ist 0.</li>
+        <li>Nie einfach durch \(z\) teilen, sonst verlierst du \(z=0\).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="good">
+    <h4>Nützliche Übersetzungen</h4>
+    <p>\(z+\bar z = 2x\) · \(z - \bar z = 2iy\) · \(z\bar z = x^2+y^2\) · \(z = \bar z \iff y = 0\) (reell) · \(z = -\bar z \iff x = 0\) (rein imaginär) · \(z^2 = x^2-y^2+2ixy\)</p>
+  </div>
+
+  <h3>Vorgerechnet</h3>
+  <div class="worked">
+    <div class="src">Klausur 04.04.2025 · e</div>
+    <h4>i. \(|z|^2 = (1-i)\,z\)</h4>
+    <p><strong>Methode B:</strong> \(z\bar z = (1-i)z \iff z\bigl(\bar z - (1-i)\bigr) = 0\). Also \(z = 0\) oder \(\bar z = 1-i\), d. h. \(z = 1+i\).</p>
+    <p><strong>Methode A zur Kontrolle:</strong> \((1-i)(x+iy) = (x+y) + i(y-x)\). Der Imaginärteil links ist 0, also \(y - x = 0\). Realteil: \(x^2+y^2 = x+y\), mit \(y=x\) wird das \(2x^2 = 2x\), also \(x\in\{0,1\}\).</p>
+    <p>Ergebnis: <span class="result">\(z\in\{0;\ 1+i\}\)</span> &nbsp; Probe: \(|1+i|^2 = 2 = (1-i)(1+i)\) ✓</p>
+
+    <h4>ii. \(z + \bar z = i(\bar z - z)\)</h4>
+    <p>Links: \(2x\). Rechts: \(i\cdot(-2iy) = -2i^2y = 2y\). Also \(2x = 2y\).</p>
+    <p>Ergebnis: <span class="result">alle \(z = x + ix\) mit \(x\in\mathbb R\)</span>, also die Winkelhalbierende \(y = x\) im I. und III. Quadranten.</p>
+  </div>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · e</span>i. \(z^2 = z\bar z\) &nbsp;&nbsp; ii. \(|z|^2 = -i(1+i)\,z\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>i.</strong> \(z^2 - z\bar z = z(z-\bar z) = 0\). Also \(z = 0\) oder \(z = \bar z\), d. h. \(z\) ist reell. Da \(0\) auch reell ist: <span class="result">\(z\in\mathbb R\)</span> (die ganze reelle Achse).</p>
+      <p><strong>ii.</strong> \(-i(1+i) = -i - i^2 = 1-i\). Damit ist es dieselbe Gleichung wie 2025 i: \(z\bar z = (1-i)z\), also <span class="result">\(z\in\{0;\ 1+i\}\)</span>.</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · e</span>i. \(z^2\in\mathbb R\) &nbsp;&nbsp; ii. \(z+\bar z = -i(z-\bar z)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>i.</strong> \(z^2 = x^2-y^2 + 2ixy\) ist reell genau dann, wenn \(2xy = 0\), also \(x = 0\) oder \(y=0\).</p>
+      <p>Ergebnis: <span class="result">\(z\) liegt auf der reellen oder der imaginären Achse</span>. Probe: \((3i)^2 = -9\in\mathbb R\) ✓</p>
+      <p><strong>ii.</strong> Links \(2x\), rechts \(-i\cdot 2iy = 2y\). Also <span class="result">\(y = x\)</span>, die Winkelhalbierende.</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · e</span>i. \(\overline{(1+i)z} = |z|^2\) &nbsp;&nbsp; ii. \(i\cdot z = z^3\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>i.</strong> \(\overline{(1+i)z} = (1-i)\bar z\). Also \((1-i)\bar z = z\bar z \iff \bar z\bigl((1-i) - z\bigr) = 0\). Damit \(\bar z = 0\), d. h. \(z=0\), oder \(z = 1-i\).</p>
+      <p>Ergebnis: <span class="result">\(z\in\{0;\ 1-i\}\)</span> (genau das Beispiel aus deiner Mitschrift „Teilmengen“).</p>
+      <p><strong>ii.</strong> \(z^3 - iz = z(z^2 - i) = 0\). Also \(z=0\) oder \(z^2 = i = e^{i\pi/2}\), d. h. \(z = \pm e^{i\pi/4}\).</p>
+      <p>Ergebnis: <span class="result">\(z\in\left\{0;\ \tfrac{\sqrt2}{2}(1+i);\ -\tfrac{\sqrt2}{2}(1+i)\right\}\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 · e</span>i. \((1+i)z = |z|^2\) &nbsp;&nbsp; ii. \(-z = z^3\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p><strong>i.</strong> \((1+i)z = z\bar z \iff z\bigl((1+i) - \bar z\bigr) = 0\). Also \(z=0\) oder \(\bar z = 1+i\), d. h. \(z = 1-i\).</p>
+      <p>Ergebnis: <span class="result">\(z\in\{0;\ 1-i\}\)</span>. Probe: \((1+i)(1-i) = 2 = |1-i|^2\) ✓</p>
+      <p><strong>ii.</strong> \(z^3 + z = z(z^2+1) = 0\). Ergebnis: <span class="result">\(z\in\{0;\ i;\ -i\}\)</span></p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== F -->
+<section id="f-wurzeln">
+  <h2>f · Komplexe Wurzeln \(z^n = a\) <span class="tag">6 P · 5 von 5 Klausuren</span></h2>
+  <p>Die Gleichung \(z^n = a\) hat in \(\mathbb C\) <strong>genau \(n\) Lösungen</strong>. Sie liegen alle auf einem Kreis mit Radius \(\sqrt[n]{|a|}\) und bilden ein regelmäßiges \(n\)-Eck.</p>
+
+  <div class="recipe">
+    <h4>Rezept</h4>
+    <ol>
+      <li>Rechte Seite kartesisch vereinfachen, z. B. \((1-i)^2 = -2i\) und \(\tfrac{1}{i} = -i\).</li>
+      <li>In Polarform bringen: \(a = r\,e^{i\varphi}\).</li>
+      <li>Formel anwenden:
+        \[ z_k = \sqrt[n]{r}\cdot e^{\,i\,\frac{\varphi + 2\pi k}{n}} = \sqrt[n]{r}\cdot e^{\,i\left(\frac{\varphi}{n} + k\cdot\frac{2\pi}{n}\right)},\qquad k = 0, 1, \dots, n-1 \]
+        In der Vorlesung steht dasselbe mit \(k = 1,\dots,n\) und \((k-1)\).</li>
+      <li>Alle \(n\) Lösungen hinschreiben. Wo der Winkel „schön“ ist (\(\frac\pi2, \pi, \frac{3\pi}{2}\) …), zusätzlich kartesisch.</li>
+    </ol>
+  </div>
+
+  <div class="trap">
+    <h4>Typische Fehler</h4>
+    <ul>
+      <li>Nur eine Lösung angegeben. Bei \(z^5\) müssen fünf dastehen.</li>
+      <li>Betrag nicht radiziert: Aus \(|a| = 4\) wird \(\sqrt[5]{4}\), nicht \(4\).</li>
+      <li>Erst \(2\pi k\) dazu, <em>dann</em> durch \(n\) teilen, also Abstand \(\frac{2\pi}{n}\). Nicht \(\varphi + \frac{2\pi k}{1}\) vergessen zu teilen.</li>
+      <li>\(\sqrt[5]{4}\) oder \(2^{-1/6}\) nicht als Dezimalzahl hinschreiben.</li>
+    </ul>
+  </div>
+
+  <h3>Vorgerechnet</h3>
+  <div class="worked">
+    <div class="src">Klausur 28.03.2026 · f</div>
+    \[ z^5 = -2\,(1-i)^2 \]
+    <div class="two">
+      <div>
+        <div class="step"><span class="n">1</span><div>\((1-i)^2 = 1 - 2i + i^2 = -2i\), also \(z^5 = -2\cdot(-2i) = 4i\).</div></div>
+        <div class="step"><span class="n">2</span><div>Polarform: \(4i = 4\,e^{i\pi/2}\), also \(r=4\), \(\varphi = \frac\pi2\).</div></div>
+        <div class="step"><span class="n">3</span><div>Radius \(\sqrt[5]{4}\), Startwinkel \(\frac{\pi/2}{5} = \frac{\pi}{10}\), Abstand \(\frac{2\pi}{5} = \frac{4\pi}{10}\).</div></div>
+        <div class="step"><span class="n">4</span><div>
+          \[ \begin{aligned}
+          z_0 &= \sqrt[5]{4}\,e^{i\pi/10} \\
+          z_1 &= \sqrt[5]{4}\,e^{i\,5\pi/10} = \sqrt[5]{4}\,e^{i\pi/2} = \sqrt[5]{4}\;i \\
+          z_2 &= \sqrt[5]{4}\,e^{i\,9\pi/10} \\
+          z_3 &= \sqrt[5]{4}\,e^{i\,13\pi/10} \\
+          z_4 &= \sqrt[5]{4}\,e^{i\,17\pi/10}
+          \end{aligned} \]</div></div>
+        <p class="muted">Probe mit \(z_1\): \((\sqrt[5]{4}\,i)^5 = 4\cdot i^5 = 4i\) ✓</p>
+      </div>
+      <figure>{{SVG_ROOTS}}<figcaption>Fünf Lösungen, gleichmäßig im Abstand von 72° auf dem Kreis mit Radius \(\sqrt[5]{4}\).</figcaption></figure>
+    </div>
+  </div>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">04.04.2025 · f</span>\(z^5 = \tfrac12(i-1)^2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\((i-1)^2 = -2i\), also \(z^5 = -i = e^{i\,3\pi/2}\). Damit \(r = 1\), Startwinkel \(\frac{3\pi}{10}\), Abstand \(\frac{4\pi}{10}\).</p>
+      \[ z_k = e^{\,i\left(\frac{3\pi}{10} + k\frac{4\pi}{10}\right)}:\quad e^{i\frac{3\pi}{10}},\ e^{i\frac{7\pi}{10}},\ e^{i\frac{11\pi}{10}},\ e^{i\frac{15\pi}{10}} = -i,\ e^{i\frac{19\pi}{10}} \]
+      <p>Probe: \((-i)^5 = -i\cdot(-i)^4 = -i\) ✓</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · f</span>\(z^3 = \tfrac{i}{2}(1-i)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\tfrac i2(1-i) = \tfrac{i - i^2}{2} = \tfrac{1+i}{2}\). Betrag \(\tfrac{\sqrt2}{2} = 2^{-1/2}\), Winkel \(\tfrac\pi4\).</p>
+      <p>Radius: \(\left(2^{-1/2}\right)^{1/3} = 2^{-1/6} = \dfrac{1}{\sqrt[6]{2}}\). Startwinkel \(\frac{\pi}{12}\), Abstand \(\frac{2\pi}{3} = \frac{8\pi}{12}\).</p>
+      \[ z_0 = 2^{-1/6}e^{i\frac{\pi}{12}},\qquad z_1 = 2^{-1/6}e^{i\frac{9\pi}{12}} = 2^{-1/6}e^{i\frac{3\pi}{4}},\qquad z_2 = 2^{-1/6}e^{i\frac{17\pi}{12}} \]
+      <p class="muted">\(z_1\) kartesisch: \(2^{-1/6}\cdot\tfrac{\sqrt2}{2}(-1+i) = 2^{-2/3}(-1+i)\).</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · f und 28.03.2024 · f</span>\(z^3 = -\tfrac{1}{2i}(i-1)\) &nbsp;bzw.&nbsp; \(z^3 = -\tfrac{i}{2}(1-i)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Beide rechten Seiten sind gleich. \(-\tfrac{1}{2i} = \tfrac{i}{2}\) (wegen \(\tfrac1i = -i\)), also \(\tfrac{i}{2}(i-1) = \tfrac{i^2 - i}{2} = \tfrac{-1-i}{2}\). Ebenso \(-\tfrac{i}{2}(1-i) = \tfrac{-i+i^2}{2} = \tfrac{-1-i}{2}\).</p>
+      <p>\(\tfrac{-1-i}{2}\) liegt im III. Quadranten: Betrag \(2^{-1/2}\), Winkel \(\tfrac{5\pi}{4}\).</p>
+      <p>Radius \(2^{-1/6}\), Startwinkel \(\frac{5\pi}{12}\), Abstand \(\frac{8\pi}{12}\):</p>
+      \[ z_0 = 2^{-1/6}e^{i\frac{5\pi}{12}},\qquad z_1 = 2^{-1/6}e^{i\frac{13\pi}{12}},\qquad z_2 = 2^{-1/6}e^{i\frac{21\pi}{12}} = 2^{-1/6}e^{i\frac{7\pi}{4}} \]
+      <p class="muted">\(z_2\) kartesisch: \(2^{-2/3}(1-i)\). Probe: \((1-i)^3 = -2-2i\), und \(2^{-2}(-2-2i) = \tfrac{-1-i}{2}\) ✓</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">Vorlesung</span>\(z^3 = i\) und \(z^3 = 2i\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(i = e^{i\pi/2}\): \(z = e^{i\pi/6},\ e^{i5\pi/6},\ e^{i3\pi/2} = -i\). Abstand \(\frac{2\pi}{3}\).</p>
+      <p>\(2i = 2e^{i\pi/2}\): dieselben Winkel, Radius \(\sqrt[3]{2}\). Also \(z = \sqrt[3]{2}e^{i\pi/6},\ \sqrt[3]{2}e^{i5\pi/6},\ \sqrt[3]{2}e^{i3\pi/2}\).</p>
+      <p class="muted">Korrektur zu deiner Mitschrift: Bei \(z_2\) steht dort \(e^{i\frac25\pi}\), gemeint ist \(e^{i\frac{2\pi}{3}}\). Das Ergebnis \(e^{i\frac{5\pi}{6}}\) stimmt.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== RECHNER -->
+<section id="rechner">
+  <h2>Selbstkontrolle</h2>
+  <p>Gib eine Zahl \(a = x + iy\) und ein \(n\) ein. Der Rechner zeigt Betrag und Winkel (auch als Bruchteil von π) und alle Lösungen von \(z^n = a\). Er ist nur zum Kontrollieren gedacht. In der Klausur musst du den Weg zeigen.</p>
+  <div class="calc">
+    <div class="inputs">
+      <label for="cx">Realteil x<input id="cx" type="number" step="any" value="0"></label>
+      <label for="cy">Imaginärteil y<input id="cy" type="number" step="any" value="4"></label>
+      <label for="cn">n (Wurzel)<input id="cn" type="number" min="1" max="12" step="1" value="5"></label>
+    </div>
+    <div class="presets" aria-label="Beispiele aus den Klausuren">
+      <button type="button" data-x="0" data-y="4" data-n="5">2026: z⁵ = 4i</button>
+      <button type="button" data-x="0" data-y="-1" data-n="5">2025: z⁵ = −i</button>
+      <button type="button" data-x="0.5" data-y="0.5" data-n="3">Dez 2024: z³ = (1+i)/2</button>
+      <button type="button" data-x="-0.5" data-y="-0.5" data-n="3">2024: z³ = (−1−i)/2</button>
+      <button type="button" data-x="3" data-y="-4" data-n="2">√(3−4i)</button>
+      <button type="button" data-x="-8" data-y="6" data-n="2">√(−8+6i)</button>
+    </div>
+    <div class="out">
+      <div>
+        <dl class="kv" id="calc-kv"></dl>
+        <ul class="rootlist" id="calc-roots"></ul>
+      </div>
+      <svg id="calc-plot" viewBox="-130 -130 260 260" role="img" aria-label="Lage von a und der Lösungen in der Zahlenebene"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== A4 -->
+<section id="a4-zettel">
+  <h2>Was auf deinen A4-Zettel gehört</h2>
+  <p>Deine bisherige Formelsammlung deckt Mathe 1 ab (Integrale, Ableitungen, Taylor …). Komplexe Zahlen fehlen dort komplett. Für den Komplex-Teil reicht ein Streifen mit genau dem, was <em>nicht</em> in der Formelsammlung im Anhang steht:</p>
+  <div class="card">
+    <ul style="margin:.2rem 0; padding-left:1.2rem; display:grid; gap:.45rem">
+      <li>Wertetabelle sin/cos mit der \(\tfrac12\sqrt{0\dots4}\)-Regel und Quadrantenregel für \(\varphi\)</li>
+      <li>\((1\pm i)^2 = \pm2i\), \(\ \tfrac1i = -i\), \(\ \tfrac{1+i}{1-i} = i\), \(\ 1+i = \sqrt2 e^{i\pi/4}\), \(\ e^{i\pi} = -1\)</li>
+      <li>Wurzelformel \(z_k = \sqrt[n]{r}\,e^{i(\varphi+2\pi k)/n},\ k=0,\dots,n-1\)</li>
+      <li>Kartesische Wurzel: \(x^2-y^2 = a,\ 2xy = b,\ x^2+y^2 = \sqrt{a^2+b^2}\)</li>
+      <li>pq-Formel, Horner-Schema als Mini-Beispiel, Vieta \(z_2+z_3 = -p,\ z_2z_3 = q\)</li>
+      <li>„Reelle Nullstelle: \(i\)-Teil = 0 setzen“</li>
+      <li>Vorfaktoren für Euler-Beweise: \(\tfrac14,\ \tfrac1{4i},\ -\tfrac14\)</li>
+      <li>Teilmengen: \(|z-z_0| &lt; r\) ist eine Kreisscheibe, \(&lt;\) gestrichelt, \(\le\) durchgezogen, Vorzeichen des Mittelpunkts umdrehen</li>
+      <li>Methode B: \(|z|^2 = z\bar z\), ausklammern, Nullprodukt</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================================================== LERNPLAN -->
+<section id="lernplan">
+  <h2>Lernplan</h2>
+  <p>Reihenfolge nach Punkten pro Lernstunde. Jede Runde: Rezept lesen, vorgerechnetes Beispiel abdecken und selbst rechnen, dann die Übungen ohne Aufklappen.</p>
+  <ul class="checklist" id="plan">
+    <li><input type="checkbox" id="p1"><label for="p1"><strong>Grundlagen</strong>: Tabelle „Zahlen, die ständig vorkommen“ und Wertetabelle auswendig, 5 Zahlen in Polarform umrechnen (Rechner zur Kontrolle).</label></li>
+    <li><input type="checkbox" id="p2"><label for="p2"><strong>c Linearfaktoren (15 P)</strong>: kartesische Wurzel üben (\(\sqrt{3-4i}\), \(\sqrt{-8+6i}\), \(\sqrt{8-6i}\)), dann alle fünf Klausuraufgaben.</label></li>
+    <li><input type="checkbox" id="p3"><label for="p3"><strong>a Berechnen</strong>: alle fünf Ausdrücke. Ziel: unter 8 Minuten pro Aufgabe.</label></li>
+    <li><input type="checkbox" id="p4"><label for="p4"><strong>f Wurzeln</strong>: alle fünf. Immer erst rechte Seite vereinfachen.</label></li>
+    <li><input type="checkbox" id="p5"><label for="p5"><strong>e Eigenschaften</strong>: Methode B üben, Methode A als Kontrolle.</label></li>
+    <li><input type="checkbox" id="p6"><label for="p6"><strong>d Teilmengen</strong>: jede Skizze einmal von Hand, mit Beschriftung und Rand-Satz.</label></li>
+    <li><input type="checkbox" id="p7"><label for="p7"><strong>b Euler</strong>: \(\sin(a\pm b)\) und \(\cos(a+b)\) einmal komplett ohne Vorlage. Moivre und \(1/e^{ix}\) merken.</label></li>
+    <li><input type="checkbox" id="p8"><label for="p8"><strong>Generalprobe</strong>: eine ganze Aufgabe 1 (z. B. 28.03.2026) in 35 Minuten auf Papier, danach mit den Lösungen hier vergleichen.</label></li>
+  </ul>
+  <p class="muted">Die Häkchen werden nur in diesem Browser gespeichert.</p>
+</section>
+
+<footer>
+  Grundlage: Vorlesungsmitschriften Technische Mathematik (komplexe Zahlen) und die Probeklausuren vom 28.03.2024, 21.06.2024, 11.12.2024, 04.04.2025 und 28.03.2026. Alle Lösungen wurden zusätzlich mit einem Computeralgebrasystem nachgerechnet.
+</footer>
+</main>
+
+<script>
+(function () {
+  // Checkliste merken (nur lokal)
+  document.querySelectorAll('#plan input[type=checkbox]').forEach(function (cb) {
+    try { cb.checked = localStorage.getItem('kz-' + cb.id) === '1'; } catch (e) {}
+    cb.addEventListener('change', function () {
+      try { localStorage.setItem('kz-' + cb.id, cb.checked ? '1' : '0'); } catch (e) {}
+    });
+  });
+
+  // Rechner
+  var ex = document.getElementById('cx'), ey = document.getElementById('cy'), en = document.getElementById('cn');
+  var kv = document.getElementById('calc-kv'), list = document.getElementById('calc-roots'), plot = document.getElementById('calc-plot');
+  var SUB = '₀₁₂₃₄₅₆₇₈₉';
+
+  function sub(k) { return String(k).split('').map(function (d) { return SUB[+d]; }).join(''); }
+  function num(v) {
+    if (Math.abs(v) < 1e-10) v = 0;
+    var s = (Math.round(v * 10000) / 10000).toString();
+    return s.replace('-', '−');
+  }
+  function piFrac(phi) {
+    var t = phi / Math.PI;
+    for (var q = 1; q <= 24; q++) {
+      var p = Math.round(t * q);
+      if (Math.abs(t * q - p) < 1e-9) {
+        var g = gcd(Math.abs(p), q); p /= g; var qq = q / g;
+        if (p === 0) return '0';
+        var sign = p < 0 ? '−' : ''; p = Math.abs(p);
+        var top = (p === 1 ? '' : p) + 'π';
+        return sign + (qq === 1 ? top : top + '/' + qq);
+      }
+    }
+    return num(t) + '·π';
+  }
+  function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+  function norm(phi) { var t = phi % (2 * Math.PI); if (t < 0) t += 2 * Math.PI; if (Math.abs(t - 2 * Math.PI) < 1e-12) t = 0; return t; }
+  function cart(x, y) {
+    if (Math.abs(x) < 1e-10) x = 0; if (Math.abs(y) < 1e-10) y = 0;
+    if (y === 0) return num(x);
+    var im = (Math.abs(y) === 1 ? '' : num(Math.abs(y))) + 'i';
+    if (x === 0) return (y < 0 ? '−' : '') + im;
+    return num(x) + (y < 0 ? ' − ' : ' + ') + im;
+  }
+  function quadrant(x, y) {
+    if (x === 0 && y === 0) return 'Ursprung';
+    if (x === 0) return 'Im-Achse';
+    if (y === 0) return 'Re-Achse';
+    if (x > 0 && y > 0) return 'I'; if (x < 0 && y > 0) return 'II'; if (x < 0) return 'III'; return 'IV';
+  }
+  function el(tag, attrs, text) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function update() {
+    var x = parseFloat(ex.value) || 0, y = parseFloat(ey.value) || 0;
+    var n = Math.max(1, Math.min(12, Math.round(parseFloat(en.value) || 1)));
+    var r = Math.hypot(x, y), phi = norm(Math.atan2(y, x));
+    var rows = [
+      ['a', cart(x, y)],
+      ['Quadrant', quadrant(x, y)],
+      ['|a| = r', num(r)],
+      ['r²', num(r * r)],
+      ['φ', r === 0 ? '–' : piFrac(phi) + '  ≈ ' + num(phi) + ' rad = ' + num(phi * 180 / Math.PI) + '°'],
+      ['ⁿ√r', num(Math.pow(r, 1 / n))]
+    ];
+    kv.innerHTML = '';
+    rows.forEach(function (row) {
+      var dt = document.createElement('dt'); dt.textContent = row[0];
+      var dd = document.createElement('dd'); dd.textContent = row[1];
+      kv.appendChild(dt); kv.appendChild(dd);
+    });
+
+    list.innerHTML = '';
+    var R = Math.pow(r, 1 / n), roots = [];
+    for (var k = 0; k < n; k++) {
+      var ang = norm((phi + 2 * Math.PI * k) / n);
+      var zx = R * Math.cos(ang), zy = R * Math.sin(ang);
+      roots.push([zx, zy]);
+      var li = document.createElement('li');
+      li.textContent = 'z' + sub(k) + ' = ' + num(R) + '·e^(i·' + piFrac(ang) + ')  =  ' + cart(zx, zy);
+      list.appendChild(li);
+    }
+    if (r === 0) { list.innerHTML = '<li>a = 0 hat nur die Lösung z = 0.</li>'; }
+
+    // Plot
+    while (plot.firstChild) plot.removeChild(plot.firstChild);
+    var maxR = Math.max(r, R, 1), s = 105 / maxR;
+    plot.appendChild(el('line', { x1: -125, y1: 0, x2: 125, y2: 0, style: 'stroke:var(--muted);stroke-width:1' }));
+    plot.appendChild(el('line', { x1: 0, y1: -125, x2: 0, y2: 125, style: 'stroke:var(--muted);stroke-width:1' }));
+    plot.appendChild(el('text', { x: 108, y: 14, style: 'fill:var(--re);font:600 11px var(--font-display)' }, 'Re'));
+    plot.appendChild(el('text', { x: 6, y: -114, style: 'fill:var(--im);font:600 11px var(--font-display)' }, 'Im'));
+    if (r > 0) {
+      plot.appendChild(el('circle', { cx: 0, cy: 0, r: R * s, style: 'fill:none;stroke:var(--im);stroke-width:1;stroke-dasharray:4 4;opacity:.6' }));
+      if (n > 2) {
+        plot.appendChild(el('polygon', { points: roots.map(function (p) { return (p[0] * s) + ',' + (-p[1] * s); }).join(' '), style: 'fill:none;stroke:var(--im);stroke-width:1.2;opacity:.7' }));
+      }
+      roots.forEach(function (p, k) {
+        plot.appendChild(el('circle', { cx: p[0] * s, cy: -p[1] * s, r: 4, style: 'fill:var(--im)' }));
+        var ux = p[0] / (R || 1), uy = p[1] / (R || 1);
+        plot.appendChild(el('text', { x: p[0] * s + ux * 12 - 5, y: -p[1] * s - uy * 12 + 4, style: 'fill:var(--im);font:500 10px var(--font-body)' }, 'z' + sub(k)));
+      });
+      plot.appendChild(el('line', { x1: 0, y1: 0, x2: x * s, y2: -y * s, style: 'stroke:var(--re);stroke-width:1.5' }));
+      plot.appendChild(el('circle', { cx: x * s, cy: -y * s, r: 4.5, style: 'fill:var(--re)' }));
+      plot.appendChild(el('text', { x: x * s + 7, y: -y * s - 7, style: 'fill:var(--re);font:600 11px var(--font-body)' }, 'a'));
+    }
+  }
+  [ex, ey, en].forEach(function (i) { i.addEventListener('input', update); });
+  document.querySelectorAll('.presets button').forEach(function (b) {
+    b.addEventListener('click', function () { ex.value = b.dataset.x; ey.value = b.dataset.y; en.value = b.dataset.n; update(); });
+  });
+  update();
+})();
+</script>
