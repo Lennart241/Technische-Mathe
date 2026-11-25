@@ -1,0 +1,669 @@
+<title>Komplexe Zahlen 14.12.</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+{{STYLE}}
+<style>
+svg .vec.re { stroke: var(--re); } svg .vec.im { stroke: var(--im); }
+svg .vec-h { fill: var(--ink); } svg .vec.re-h, svg .re-h { fill: var(--re); } svg .vec.im-h, svg .im-h { fill: var(--im); }
+svg path.re-h, svg path.im-h, svg path.vec-h { stroke: none; }
+svg .reline { stroke: var(--re); stroke-width: 3; opacity: .55; }
+svg .arc.faint { opacity: .5; }
+svg.timeplot { width: 100%; height: auto; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+svg .c-re { fill: none; stroke: var(--re); stroke-width: 1.8; }
+svg .c-im { fill: none; stroke: var(--im); stroke-width: 1.8; }
+svg .c-sum { fill: none; stroke: var(--ink); stroke-width: 2.6; }
+.legend.curves span::before { border-top-style: solid; }
+.legend.curves .lre::before { border-top-color: var(--re); }
+.legend.curves .lim::before { border-top-color: var(--im); }
+.legend.curves .lsum::before { border-top-color: var(--ink); border-top-width: 3px; }
+.changes td:nth-child(2) { white-space: nowrap; font-weight: 600; }
+.yes { color: var(--ok); } .no { color: var(--muted); } .new { color: var(--im); }
+.calc + .calc { margin-top: 1rem; }
+.calc h3 { margin-top: 0; }
+.calc select { font: 500 .95rem var(--font-mono); padding: .4rem .5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.calc .row-label { font: 600 .85rem var(--font-display); color: var(--ink); align-self: center; min-width: 2.2rem; }
+.calc .inputs + .inputs { margin-top: .6rem; }
+#ph-plot { width: 100%; max-width: 340px; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.15rem; }
+.sheet h4 { margin: .9rem 0 .2rem; font-size: .82rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--re); }
+.sheet h4:first-child { margin-top: 0; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+  svg: { fontCache: "global" },
+  options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Technische Mathematik · Klausur am 14.12.2026 · neuer Prüfer</div>
+  <h1>Komplexe Zahlen <span class="re">Re</span> + <span class="im">j·Im</span></h1>
+  <p class="lead">Lernzettel nach dem Anforderungsdokument „Prüfungsvorbereitung – Technische Mathematik am 14.12.2026“. <strong>Der Stoff ist schmaler als bei der alten Klausur</strong>, dafür kommen harmonische Schwingungen mit komplexen Zeigern dazu. Jedes Beispiel aus dem Dokument ist hier komplett vorgerechnet.</p>
+</header>
+</div>
+
+<nav class="toc" aria-label="Abschnitte">
+  <ul>
+    <li><a href="#neu">Was ist neu</a></li>
+    <li><a href="#aufteilung">Aufteilung</a></li>
+    <li><a href="#formen">1.1 Darstellungen</a></li>
+    <li><a href="#ebene">1.2 Zahlenebene</a></li>
+    <li><a href="#rechnen">1.3 Rechnen</a></li>
+    <li><a href="#schwingungen">1.4 Schwingungen</a></li>
+    <li><a href="#dgl">Brücke zur DGL</a></li>
+    <li><a href="#rechner">Rechner</a></li>
+    <li><a href="#formelsammlung">Formelsammlung</a></li>
+    <li><a href="#lernplan">Lernplan</a></li>
+  </ul>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================================================== NEU -->
+<section id="neu">
+  <h2>Was sich gegenüber der alten Klausur ändert</h2>
+
+  <div class="tablewrap">
+  <table class="changes">
+    <thead><tr><th>Thema</th><th>14.12.2026</th><th>Bemerkung</th></tr></thead>
+    <tbody>
+      <tr><td>Darstellungsformen umwandeln (kartesisch, trigonometrisch, exponentiell)</td><td class="yes">gefordert</td><td>Kern des Teils, mit Betrag und Argument</td></tr>
+      <tr><td>Gaußsche Zahlenebene</td><td class="yes">gefordert</td><td>einzelne Zahlen einzeichnen, Re, Im und Betrag kennzeichnen</td></tr>
+      <tr><td>Grundrechenarten (+, −, ·, ÷, Potenz)</td><td class="yes">gefordert</td><td>wie bisher</td></tr>
+      <tr><td>Harmonische Schwingungen, komplexe Zeiger, Addition gleichfrequenter Schwingungen</td><td class="new">neu</td><td>Amplitude und Phasenverschiebung bestimmen</td></tr>
+      <tr><td>Linearfaktorzerlegung komplexer Polynome</td><td class="no">nicht genannt</td><td>war bisher die 15-Punkte-Aufgabe</td></tr>
+      <tr><td>Beweise mit der Euler-Formel (Additionstheoreme)</td><td class="no">nicht genannt</td><td>Euler-Formel selbst brauchst du aber weiterhin</td></tr>
+      <tr><td>Komplexe Wurzeln \(z^n = a\)</td><td class="no">nicht genannt</td><td></td></tr>
+      <tr><td>Teilmengen skizzieren, „Für welche z gilt …?“</td><td class="no">nicht genannt</td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <h4>Zwei Umstellungen</h4>
+    <ul>
+      <li><strong>\(j\) statt \(i\).</strong> Der neue Prüfer schreibt wie in der Elektrotechnik \(j\) für die imaginäre Einheit (\(i\) ist dort der Strom), und die Zahl steht oft hinter dem \(j\): \(z = 3 + j4\) bedeutet dasselbe wie \(3 + 4i\). Es gilt \(j^2 = -1\). Gewöhn dich daran, so zu schreiben.</li>
+      <li><strong>Eigene Formelsammlung:</strong> zwei DIN-A4-Seiten, selbst erstellt. Eine offizielle Formelsammlung im Anhang wie bisher ist nicht angekündigt. Plane also alles ein, was du brauchst. Ein fertiger Baustein für den Komplex-Teil steht <a href="#formelsammlung">unten</a>.</li>
+    </ul>
+  </div>
+  <p class="muted">Der alte Lernzettel (Linearfaktorzerlegung, Wurzeln, Teilmengen) bleibt als Ergänzung nützlich, ist für den 14.12. aber kein Pflichtstoff mehr.</p>
+</section>
+
+<!-- ===================================================== AUFTEILUNG -->
+<section id="aufteilung">
+  <h2>Passt die Aufteilung noch?</h2>
+  <p>Kurz: <strong>Die Gewichte haben sich zu den Differentialgleichungen verschoben.</strong> Punkte stehen im Dokument nicht, aber Umfang und Tiefe sind eindeutig:</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Bereich</th><th class="num">Unterkapitel</th><th class="num">Beispielaufgaben</th><th>Charakter</th></tr></thead>
+    <tbody>
+      <tr><td>1 Komplexe Zahlen</td><td class="num">4</td><td class="num">5</td><td>Handwerk: umrechnen, rechnen, Zeiger addieren</td></tr>
+      <tr><td>2 Differentialgleichungen</td><td class="num">4 (2.4 mit A, B, C)</td><td class="num">14</td><td>mehrstufige Lösungsverfahren mit Anfangswerten</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>In der alten Klausur waren die komplexen Zahlen mit 45 Punkten eine eigene, große Aufgabe. Jetzt ist der Teil deutlich kleiner und braucht weniger Lernzeit. <strong>Vorschlag: etwa ein Drittel deiner Lernzeit für komplexe Zahlen, zwei Drittel für Differentialgleichungen.</strong></p>
+  <div class="good">
+    <h4>Warum komplexe Zahlen trotzdem doppelt zählen</h4>
+    <p>Komplexe Rechnung taucht im DGL-Teil wieder auf: Bei \(y'' + 4y' + 13y = 0\) hat die charakteristische Gleichung die Nullstellen \(\lambda = -2 \pm j3\), und um daraus die Lösung zu bauen, brauchst du die Euler-Formel. Wer die Grundlagen hier sicher kann, verliert dort keine Punkte. Siehe <a href="#dgl">Brücke zur DGL</a>.</p>
+  </div>
+</section>
+
+<!-- ===================================================== 1.1 -->
+<section id="formen">
+  <h2>1.1 Darstellungsformen <span class="tag">umrechnen</span></h2>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Form</th><th>Schreibweise</th><th>Bestandteile</th></tr></thead>
+    <tbody>
+      <tr><td>kartesisch (algebraisch)</td><td>\(z = x + jy\)</td><td>Realteil \(x = \mathrm{Re}(z)\), Imaginärteil \(y = \mathrm{Im}(z)\)</td></tr>
+      <tr><td>trigonometrisch</td><td>\(z = r\,(\cos\varphi + j\sin\varphi)\)</td><td>Betrag \(r = |z|\), Argument \(\varphi = \arg(z)\)</td></tr>
+      <tr><td>exponentiell (Euler)</td><td>\(z = r\,e^{j\varphi}\)</td><td>dieselben \(r\) und \(\varphi\)</td></tr>
+      <tr><td>Versorform (E-Technik)</td><td>\(z = r\angle\varphi\)</td><td>Kurzschreibweise für \(r\,e^{j\varphi}\), oft mit \(\varphi\) in Grad</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Die Brücke zwischen trigonometrischer und exponentieller Form ist die <strong>Euler-Formel</strong> \(e^{j\varphi} = \cos\varphi + j\sin\varphi\). Die beiden unterscheiden sich nur in der Schreibweise.</p>
+
+  <div class="two">
+    <div class="recipe">
+      <h4>Kartesisch → polar</h4>
+      <ol>
+        <li>Punkt grob skizzieren, Quadrant ablesen.</li>
+        <li>\(r = |z| = \sqrt{x^2 + y^2}\)</li>
+        <li>\(\varphi\) mit der Quadrantenregel (Tabelle unten).</li>
+        <li>Einsetzen: \(r(\cos\varphi + j\sin\varphi) = r\,e^{j\varphi}\).</li>
+      </ol>
+    </div>
+    <div class="recipe">
+      <h4>Polar → kartesisch</h4>
+      <ol>
+        <li>\(x = r\cos\varphi\)</li>
+        <li>\(y = r\sin\varphi\)</li>
+        <li>Bei Standardwinkeln exakt mit der Wertetabelle rechnen, sonst mit dem Taschenrechner (Bogenmaß bzw. Grad beachten!).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Lage von z</th><th>Argument \(\varphi\) (Hauptwert in \((-\pi, \pi]\))</th></tr></thead>
+    <tbody>
+      <tr><td>I. oder IV. Quadrant (\(x &gt; 0\))</td><td>\(\varphi = \arctan\frac{y}{x}\)</td></tr>
+      <tr><td>II. Quadrant (\(x &lt; 0,\ y \ge 0\))</td><td>\(\varphi = \arctan\frac{y}{x} + \pi\) &nbsp;(\(+180^\circ\))</td></tr>
+      <tr><td>III. Quadrant (\(x &lt; 0,\ y &lt; 0\))</td><td>\(\varphi = \arctan\frac{y}{x} - \pi\) &nbsp;(\(-180^\circ\)); alternativ \(+\pi\) für \([0, 2\pi)\)</td></tr>
+      <tr><td>positive / negative Im-Achse (\(x = 0\))</td><td>\(\varphi = +\frac{\pi}{2}\ (90^\circ)\) bzw. \(-\frac{\pi}{2}\ (-90^\circ)\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Der Taschenrechner liefert bei \(\arctan\) immer nur Werte zwischen \(-90^\circ\) und \(+90^\circ\). Bei \(x &lt; 0\) liegt er deshalb um \(180^\circ\) daneben. Deshalb immer erst skizzieren.</p>
+
+  <h3>Beispiel 1 aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">Gegeben: \(z = 3 + j4\)</div>
+    <div class="step"><span class="n">1</span><div><strong>Real- und Imaginärteil:</strong> \(\mathrm{Re}(z) = 3,\quad \mathrm{Im}(z) = 4\). Der Imaginärteil ist die reelle Zahl 4, nicht \(j4\).</div></div>
+    <div class="step"><span class="n">2</span><div><strong>Betrag:</strong> \(|z| = \sqrt{3^2 + 4^2} = \sqrt{25} = 5\)</div></div>
+    <div class="step"><span class="n">3</span><div><strong>Argument:</strong> \(z\) liegt im I. Quadranten, also
+      \[ \varphi = \arctan\tfrac43 \approx 0{,}9273 \text{ rad} \approx 53{,}13^\circ \]</div></div>
+    <div class="step"><span class="n">4</span><div><strong>Trigonometrische Form:</strong>
+      \[ z = 5\,\bigl(\cos(53{,}13^\circ) + j\sin(53{,}13^\circ)\bigr) \]
+      Kontrolle: \(\cos\varphi = \tfrac35,\ \sin\varphi = \tfrac45\), also \(5\cdot\tfrac35 = 3\) und \(5\cdot\tfrac45 = 4\) ✓</div></div>
+    <div class="step"><span class="n">5</span><div><strong>Exponentialform:</strong>
+      \[ z = 5\,e^{j\,0{,}9273} \qquad (\text{exakt: } 5\,e^{j\arctan(4/3)},\ \text{Versorform } 5\angle 53{,}13^\circ) \]</div></div>
+  </div>
+
+  <h3>Beispiel 2 aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">Gegeben: \(z = 5\,e^{j\frac{\pi}{3}}\). Gesucht: kartesische Form</div>
+    \[ z = 5\left(\cos\tfrac{\pi}{3} + j\sin\tfrac{\pi}{3}\right) = 5\left(\tfrac12 + j\tfrac{\sqrt3}{2}\right) = \tfrac52 + j\,\tfrac{5\sqrt3}{2} \approx 2{,}5 + j\,4{,}33 \]
+    <p class="muted">\(\frac{\pi}{3} = 60^\circ\), Werte aus der Wertetabelle: \(\cos 60^\circ = \frac12,\ \sin 60^\circ = \frac{\sqrt3}{2}\).</p>
+  </div>
+
+  <h3>Wertetabelle</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Grad</th><th>0°</th><th>30°</th><th>45°</th><th>60°</th><th>90°</th><th>180°</th></tr></thead>
+    <tbody>
+      <tr><td>Bogenmaß</td><td>\(0\)</td><td>\(\tfrac{\pi}{6}\)</td><td>\(\tfrac{\pi}{4}\)</td><td>\(\tfrac{\pi}{3}\)</td><td>\(\tfrac{\pi}{2}\)</td><td>\(\pi\)</td></tr>
+      <tr><td>\(\sin\)</td><td>\(0\)</td><td>\(\tfrac12\)</td><td>\(\tfrac{\sqrt2}{2}\)</td><td>\(\tfrac{\sqrt3}{2}\)</td><td>\(1\)</td><td>\(0\)</td></tr>
+      <tr><td>\(\cos\)</td><td>\(1\)</td><td>\(\tfrac{\sqrt3}{2}\)</td><td>\(\tfrac{\sqrt2}{2}\)</td><td>\(\tfrac12\)</td><td>\(0\)</td><td>\(-1\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Umrechnung: \(\varphi_{\text{rad}} = \varphi_{\text{Grad}}\cdot\frac{\pi}{180^\circ}\). Für andere Quadranten: \(\cos(\pi - \alpha) = -\cos\alpha\), \(\sin(\pi-\alpha) = \sin\alpha\), \(\cos(-\alpha) = \cos\alpha\), \(\sin(-\alpha) = -\sin\alpha\).</p>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 1</span>\(z = -2 + j2\) in trigonometrische und Exponentialform</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>II. Quadrant. \(r = \sqrt{4+4} = 2\sqrt2\). \(\varphi = \arctan\frac{2}{-2} + \pi = -\frac{\pi}{4} + \pi = \frac{3\pi}{4}\ (135^\circ)\).</p>
+      <p><span class="result">\(z = 2\sqrt2\left(\cos\tfrac{3\pi}{4} + j\sin\tfrac{3\pi}{4}\right) = 2\sqrt2\,e^{j\frac{3\pi}{4}}\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 2</span>\(z = 1 - j\sqrt3\) in Exponentialform</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>IV. Quadrant. \(r = \sqrt{1+3} = 2\). \(\varphi = \arctan(-\sqrt3) = -\frac{\pi}{3}\ (-60^\circ)\).</p>
+      <p><span class="result">\(z = 2\,e^{-j\frac{\pi}{3}}\)</span> &nbsp;(gleichwertig \(2\,e^{j\frac{5\pi}{3}}\))</p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 3</span>\(z = -3 - j4\) und \(z = -j4\) in Exponentialform</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(-3-j4\): III. Quadrant, \(r = 5\). Der Taschenrechner gibt \(\arctan\frac{-4}{-3} = \arctan\frac43 \approx 53{,}13^\circ\). Das ist falsch, weil der Punkt links unten liegt. Richtig: \(53{,}13^\circ - 180^\circ = -126{,}87^\circ\) (oder \(233{,}13^\circ\)).</p>
+      <p><span class="result">\(-3 - j4 = 5\,e^{-j\,2{,}214} = 5\angle{-126{,}87^\circ}\)</span></p>
+      <p>\(-j4\): liegt auf der negativen Im-Achse, \(r = 4\), \(\varphi = -\frac{\pi}{2}\). <span class="result">\(-j4 = 4\,e^{-j\frac{\pi}{2}}\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 4</span>\(2\,e^{j\frac{3\pi}{4}}\), \(\ 4\,e^{-j\frac{\pi}{6}}\) und \(6\angle 180^\circ\) kartesisch</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(2\left(\cos 135^\circ + j\sin 135^\circ\right) = 2\left(-\tfrac{\sqrt2}{2} + j\tfrac{\sqrt2}{2}\right) = \) <span class="result">\(-\sqrt2 + j\sqrt2\)</span></p>
+      <p>\(4\left(\cos(-30^\circ) + j\sin(-30^\circ)\right) = 4\left(\tfrac{\sqrt3}{2} - j\tfrac12\right) = \) <span class="result">\(2\sqrt3 - j2\)</span></p>
+      <p>\(6(\cos 180^\circ + j\sin 180^\circ) = \) <span class="result">\(-6\)</span></p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== 1.2 -->
+<section id="ebene">
+  <h2>1.2 Gaußsche Zahlenebene <span class="tag">zeichnen und deuten</span></h2>
+  <p>Jede komplexe Zahl \(z = x + jy\) ist ein Punkt \((x\,|\,y)\) bzw. ein Zeiger vom Ursprung zu diesem Punkt. Waagerechte Achse: Re. Senkrechte Achse: Im.</p>
+
+  <div class="worked">
+    <div class="src">Beispiel aus dem Anforderungsdokument: \(z_1 = 2 + j3,\ z_2 = -2 + j\)</div>
+    <div class="two">
+      <figure>{{SVG_GAUSS}}<figcaption>Blau: Realteil auf der Re-Achse. Magenta: Imaginärteil als Höhe. Pfeillänge: Betrag.</figcaption></figure>
+      <div>
+        <p><strong>\(z_1 = 2 + j3\):</strong> 2 nach rechts, 3 nach oben.<br>\(\mathrm{Re} = 2,\ \mathrm{Im} = 3,\ |z_1| = \sqrt{4 + 9} = \sqrt{13} \approx 3{,}61\)<br>\(\varphi_1 = \arctan\tfrac32 \approx 56{,}31^\circ\)</p>
+        <p><strong>\(z_2 = -2 + j\):</strong> 2 nach links, 1 nach oben.<br>\(\mathrm{Re} = -2,\ \mathrm{Im} = 1,\ |z_2| = \sqrt{4+1} = \sqrt5 \approx 2{,}24\)<br>\(\varphi_2 = \arctan\tfrac{1}{-2} + 180^\circ \approx 153{,}43^\circ\)</p>
+      </div>
+    </div>
+    <div class="recipe">
+      <h4>Checkliste für die Zeichnung</h4>
+      <ol>
+        <li>Achsen mit Pfeil und „Re“ bzw. „Im“ beschriften, gleiche Einheit auf beiden Achsen.</li>
+        <li>Punkt eintragen und Zeiger vom Ursprung aus zeichnen.</li>
+        <li>Realteil als Strecke auf der Re-Achse, Imaginärteil als senkrechte Strecke markieren und beschriften.</li>
+        <li>Betrag an den Zeiger schreiben, ggf. Winkel \(\varphi\) als Bogen ab der positiven Re-Achse.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Geometrische Bedeutung der Rechenarten</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Operation</th><th>in der Zahlenebene</th></tr></thead>
+    <tbody>
+      <tr><td>\(z_1 + z_2\)</td><td>Zeiger aneinanderhängen (Parallelogramm, wie Vektoraddition)</td></tr>
+      <tr><td>\(\bar z = x - jy\)</td><td>Spiegelung an der reellen Achse</td></tr>
+      <tr><td>\(z \cdot j\)</td><td>Drehung um \(+90^\circ\) gegen den Uhrzeigersinn</td></tr>
+      <tr><td>\(z \cdot (-1)\)</td><td>Drehung um \(180^\circ\) (Punktspiegelung am Ursprung)</td></tr>
+      <tr><td>\(z_1 \cdot z_2\)</td><td>Drehstreckung: Beträge multiplizieren, Winkel addieren</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ===================================================== 1.3 -->
+<section id="rechnen">
+  <h2>1.3 Grundrechenarten <span class="tag">sicher beherrschen</span></h2>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Operation</th><th>kartesisch</th><th>polar</th></tr></thead>
+    <tbody>
+      <tr><td>Addition / Subtraktion</td><td>Re mit Re, Im mit Im: \((a + jb) \pm (c + jd) = (a\pm c) + j(b \pm d)\)</td><td>nicht direkt möglich, erst kartesisch umrechnen</td></tr>
+      <tr><td>Multiplikation</td><td>ausmultiplizieren, \(j^2 = -1\): \((a+jb)(c+jd) = (ac - bd) + j(ad + bc)\)</td><td>\(r_1r_2\,e^{j(\varphi_1+\varphi_2)}\)</td></tr>
+      <tr><td>Division</td><td>mit konjugiertem Nenner erweitern: \(\dfrac{z_1}{z_2} = \dfrac{z_1\,\bar z_2}{|z_2|^2}\)</td><td>\(\dfrac{r_1}{r_2}\,e^{j(\varphi_1-\varphi_2)}\)</td></tr>
+      <tr><td>Potenz</td><td>binomische Formel: \((a+jb)^2 = a^2 - b^2 + j\,2ab\)</td><td>\(r^n\,e^{jn\varphi}\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Potenzen von \(j\): \(j^2 = -1,\ j^3 = -j,\ j^4 = 1,\ \frac1j = -j\). &nbsp; Nützlich: \(z\cdot\bar z = x^2 + y^2 = |z|^2\) ist immer reell.</p>
+  <p><strong>Faustregel:</strong> Addieren und subtrahieren kartesisch, multiplizieren und dividieren wahlweise, Potenzen ab Hochzahl 3 polar.</p>
+
+  <h3>Beispiel aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">\(z_1 = 2 + j3,\quad z_2 = 1 - j2\)</div>
+    <div class="step"><span class="n">a</span><div>\(z_1 + z_2 = (2 + 1) + j(3 - 2) = \) <span class="result">\(3 + j\)</span></div></div>
+    <div class="step"><span class="n">b</span><div>\(z_1 - z_2 = (2 - 1) + j(3 - (-2)) = \) <span class="result">\(1 + j5\)</span></div></div>
+    <div class="step"><span class="n">c</span><div>\(z_1\cdot z_2 = 2 - j4 + j3 - j^2 6 = 2 - j + 6 = \) <span class="result">\(8 - j\)</span></div></div>
+    <div class="step"><span class="n">d</span><div>Mit \(\bar z_2 = 1 + j2\) erweitern:
+      \[ \frac{z_1}{z_2} = \frac{(2 + j3)(1 + j2)}{(1 - j2)(1 + j2)} = \frac{2 + j4 + j3 + j^2 6}{1 + 4} = \frac{-4 + j7}{5} = -0{,}8 + j1{,}4 \]</div></div>
+    <div class="step"><span class="n">e</span><div>\(z_1^2 = (2 + j3)^2 = 4 + j12 + j^2 9 = \) <span class="result">\(-5 + j12\)</span></div></div>
+    <p class="muted">Probe für d: \((-0{,}8 + j1{,}4)(1 - j2) = -0{,}8 + j1{,}6 + j1{,}4 + 2{,}8 = 2 + j3 = z_1\) ✓. Eine Division kontrollierst du immer durch Zurückmultiplizieren.</p>
+  </div>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 5</span>\(z_1 = 3 - j4,\ z_2 = -1 + j2\): Summe, Differenz, Produkt, Quotient, \(z_1^2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(z_1 + z_2 = 2 - j2\) &nbsp;·&nbsp; \(z_1 - z_2 = 4 - j6\)</p>
+      <p>\(z_1 z_2 = -3 + j6 + j4 - j^2 8 = 5 + j10\)</p>
+      <p>\(\dfrac{z_1}{z_2} = \dfrac{(3 - j4)(-1 - j2)}{(-1)^2 + 2^2} = \dfrac{-3 - j6 + j4 + j^2 8}{5} = \dfrac{-11 - j2}{5} = -2{,}2 - j0{,}4\)</p>
+      <p>\(z_1^2 = 9 - j24 + j^2 16 = -7 - j24\)</p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 6</span>Polar: \(2e^{j\frac{\pi}{6}}\cdot 3e^{j\frac{\pi}{3}}\), \(\ \dfrac{8e^{j\frac{\pi}{2}}}{2e^{j\frac{\pi}{4}}}\), \(\ (1 + j)^8\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(2\cdot 3\,e^{j(\frac{\pi}{6} + \frac{\pi}{3})} = 6\,e^{j\frac{\pi}{2}} = \) <span class="result">\(j6\)</span></p>
+      <p>\(\frac82\,e^{j(\frac{\pi}{2} - \frac{\pi}{4})} = \) <span class="result">\(4\,e^{j\frac{\pi}{4}} = 2\sqrt2 + j2\sqrt2\)</span></p>
+      <p>\(1 + j = \sqrt2\,e^{j\frac{\pi}{4}}\), also \((1 + j)^8 = (\sqrt2)^8\,e^{j2\pi} = 16\cdot 1 = \) <span class="result">\(16\)</span>. Kartesisch ausmultipliziert wäre das sehr mühsam.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== 1.4 -->
+<section id="schwingungen">
+  <h2>1.4 Harmonische Schwingungen und Zeiger <span class="tag">neu</span></h2>
+  <p>Das kennst du aus der wechselstromtechnischen Fundierung. Mathematisch steckt nur die Euler-Formel dahinter.</p>
+
+  <h3>Idee</h3>
+  <p>Eine harmonische Schwingung \(x(t) = \hat x\cos(\omega t + \varphi)\) hat die Amplitude \(\hat x\), die Kreisfrequenz \(\omega\) und den Nullphasenwinkel \(\varphi\). Mit Euler gilt</p>
+  \[ x(t) = \hat x\cos(\omega t + \varphi) = \mathrm{Re}\left(\hat x\,e^{j(\omega t + \varphi)}\right) = \mathrm{Re}\Bigl(\underbrace{\hat x\,e^{j\varphi}}_{\underline{X}}\cdot e^{j\omega t}\Bigr) \]
+  <p>Die <strong>komplexe Amplitude</strong> (der Zeiger) \(\underline{X} = \hat x\,e^{j\varphi}\) enthält alles außer der Zeit: Länge = Amplitude, Winkel = Phase. Der Faktor \(e^{j\omega t}\) dreht alle Zeiger gleich schnell. <strong>Bei gleicher Frequenz</strong> addierst du deshalb einfach die Zeiger:</p>
+  \[ \hat x_1\cos(\omega t + \varphi_1) + \hat x_2\cos(\omega t + \varphi_2) = \mathrm{Re}\left((\underline{X}_1 + \underline{X}_2)\,e^{j\omega t}\right) = |\underline X|\cos(\omega t + \arg\underline X) \]
+
+  <div class="recipe">
+    <h4>Rezept: gleichfrequente Schwingungen addieren</h4>
+    <ol>
+      <li><strong>Auf Kosinus-Form bringen</strong> mit positiver Amplitude: \(\sin(\omega t + \varphi) = \cos(\omega t + \varphi - \frac{\pi}{2})\) und \(-\hat x\cos(\omega t + \varphi) = \hat x\cos(\omega t + \varphi + \pi)\).</li>
+      <li><strong>Zeiger aufschreiben:</strong> \(\underline X_k = \hat x_k\,e^{j\varphi_k}\).</li>
+      <li><strong>In kartesische Form umrechnen:</strong> \(\underline X_k = \hat x_k\cos\varphi_k + j\,\hat x_k\sin\varphi_k\).</li>
+      <li><strong>Addieren:</strong> Realteile und Imaginärteile getrennt.</li>
+      <li><strong>Zurück in Polarform:</strong> Amplitude \(\hat x = |\underline X|\), Phase \(\varphi = \arg\underline X\) mit Quadrantenregel.</li>
+      <li><strong>Reelle Schwingung hinschreiben:</strong> \(x(t) = \hat x\cos(\omega t + \varphi)\). Die Frequenz bleibt gleich.</li>
+    </ol>
+  </div>
+
+  <div class="trap">
+    <h4>Typische Fehler</h4>
+    <ul>
+      <li>Amplituden einfach addiert (\(3 + 4 = 7\)). Das stimmt nur, wenn beide Schwingungen dieselbe Phase haben.</li>
+      <li>Sinus-Schwingung ohne Umrechnung als Zeiger mit gleicher Phase übernommen.</li>
+      <li>Phase im falschen Quadranten, siehe 1.1. Skizze des Zeigerdiagramms hilft.</li>
+      <li>Grad und Bogenmaß gemischt: im Argument \(\omega t + \varphi\) einheitlich bleiben.</li>
+      <li>Verschiedene Frequenzen addiert: Das Verfahren gilt nur für gleiche \(\omega\).</li>
+    </ul>
+  </div>
+
+  <h3>Beispiel aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">\(x_1(t) = 3\cos(\omega t),\quad x_2(t) = 4\cos\left(\omega t + \frac{\pi}{2}\right)\)</div>
+    <div class="two">
+      <div>
+        <div class="step"><span class="n">a</span><div><strong>Zeiger:</strong> \(\underline X_1 = 3\,e^{j0} = 3\), &nbsp;\(\underline X_2 = 4\,e^{j\frac{\pi}{2}} = 4\left(\cos\tfrac{\pi}{2} + j\sin\tfrac{\pi}{2}\right) = j4\)</div></div>
+        <div class="step"><span class="n">b</span><div><strong>Resultierender Zeiger:</strong> \(\underline X = \underline X_1 + \underline X_2 = 3 + j4\)</div></div>
+        <div class="step"><span class="n">c</span><div><strong>Amplitude:</strong> \(\hat x = |\underline X| = \sqrt{3^2 + 4^2} = 5\)</div></div>
+        <div class="step"><span class="n">d</span><div><strong>Phasenverschiebung:</strong> I. Quadrant, \(\varphi = \arctan\tfrac43 \approx 0{,}927 \text{ rad} \approx 53{,}13^\circ\). Positiv heißt: Die Summe eilt \(x_1\) um \(53{,}13^\circ\) voraus.</div></div>
+        <div class="step"><span class="n">e</span><div><strong>Reelle Schwingung:</strong>
+          \[ x(t) = 5\cos\left(\omega t + 0{,}927\right) = 5\cos\left(\omega t + 53{,}13^\circ\right) \]</div></div>
+      </div>
+      <figure>{{SVG_ZEIGER}}<figcaption>Zeigerdiagramm: Die Zeiger stehen senkrecht aufeinander, deshalb Pythagoras.</figcaption></figure>
+    </div>
+    <figure>
+      {{SVG_TIME}}
+      <div class="legend curves"><span class="lre">x₁ = 3 cos(ωt)</span><span class="lim">x₂ = 4 cos(ωt + π/2)</span><span class="lsum">x = x₁ + x₂ = 5 cos(ωt + 53,13°)</span></div>
+      <figcaption>Im Zeitbereich: Die Summe hat Amplitude 5 (nicht 7) und erreicht ihr Maximum etwas vor dem von x₁.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 7</span>\(x_1 = 4\sin(\omega t),\ x_2 = 4\cos(\omega t)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Erst umschreiben: \(4\sin(\omega t) = 4\cos(\omega t - \frac{\pi}{2})\). Also \(\underline X_1 = 4e^{-j\frac{\pi}{2}} = -j4\) und \(\underline X_2 = 4\).</p>
+      <p>\(\underline X = 4 - j4\): IV. Quadrant, \(|\underline X| = 4\sqrt2\), \(\varphi = \arctan(-1) = -\frac{\pi}{4}\).</p>
+      <p><span class="result">\(x(t) = 4\sqrt2\cos\left(\omega t - \frac{\pi}{4}\right) \approx 5{,}66\cos(\omega t - 45^\circ)\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 8</span>\(x_1 = 2\cos(\omega t + \frac{\pi}{3}),\ x_2 = 2\cos(\omega t - \frac{\pi}{3})\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\underline X_1 = 2(\tfrac12 + j\tfrac{\sqrt3}{2}) = 1 + j\sqrt3\), \(\underline X_2 = 1 - j\sqrt3\).</p>
+      <p>\(\underline X = 2\): Die Imaginärteile heben sich auf. <span class="result">\(x(t) = 2\cos(\omega t)\)</span></p>
+      <p class="muted">Zwei gleich große Schwingungen, symmetrisch um 0 verschoben, ergeben eine Schwingung mit Phase 0.</p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 9</span>\(x_1 = 3\cos(\omega t + \frac{\pi}{6}),\ x_2 = -2\cos(\omega t)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Negative Amplitude: \(-2\cos(\omega t) = 2\cos(\omega t + \pi)\), also \(\underline X_2 = 2e^{j\pi} = -2\). Man kann aber auch direkt \(-2\) als Zeiger nehmen.</p>
+      <p>\(\underline X_1 = 3\left(\tfrac{\sqrt3}{2} + j\tfrac12\right) = \tfrac{3\sqrt3}{2} + j\tfrac32 \approx 2{,}598 + j1{,}5\)</p>
+      <p>\(\underline X = \left(\tfrac{3\sqrt3}{2} - 2\right) + j\tfrac32 \approx 0{,}598 + j1{,}5\) (I. Quadrant)</p>
+      <p>\(|\underline X| = \sqrt{13 - 6\sqrt3} \approx 1{,}615\), \(\ \varphi = \arctan\frac{1{,}5}{0{,}598} \approx 1{,}191 \text{ rad} \approx 68{,}26^\circ\)</p>
+      <p><span class="result">\(x(t) \approx 1{,}615\cos(\omega t + 68{,}26^\circ)\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung 10 · Drehstrom</span>\(5\cos(\omega t) + 5\cos(\omega t + 120^\circ) + 5\cos(\omega t + 240^\circ)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\underline X_1 = 5\), \(\ \underline X_2 = 5(-\tfrac12 + j\tfrac{\sqrt3}{2})\), \(\ \underline X_3 = 5(-\tfrac12 - j\tfrac{\sqrt3}{2})\).</p>
+      <p>Realteile: \(5 - 2{,}5 - 2{,}5 = 0\). Imaginärteile heben sich auf. <span class="result">Summe \(= 0\)</span> zu jedem Zeitpunkt.</p>
+      <p class="muted">Das ist der Grund, warum im symmetrischen Drehstromnetz der Neutralleiter stromlos ist.</p>
+    </div>
+  </details>
+
+  <div class="card">
+    <h4 style="margin-top:0">Zusammenhang mit der Wechselstromtechnik</h4>
+    <p>Dieselbe Zeigerrechnung steckt hinter den komplexen Widerständen: \(\underline Z_R = R\), \(\ \underline Z_L = j\omega L\), \(\ \underline Z_C = \frac{1}{j\omega C} = -\frac{j}{\omega C}\) und \(\underline U = \underline Z\cdot\underline I\). Multiplikation mit \(j\) heißt 90° Voreilung, deshalb eilt an der Spule die Spannung dem Strom um 90° voraus. Im Anforderungsdokument steht nur die Addition von Schwingungen, aber die Rechentechnik ist dieselbe.</p>
+  </div>
+</section>
+
+<!-- ===================================================== DGL -->
+<section id="dgl">
+  <h2>Brücke zur DGL <span class="tag">2.4 A und B</span></h2>
+  <p>Zwei Stellen im DGL-Teil des Anforderungsdokuments brauchen komplexe Zahlen.</p>
+
+  <h3>Komplex konjugierte Nullstellen (2.4 A, Beispiel 3)</h3>
+  <div class="worked">
+    <div class="src">\(y'' + 4y' + 13y = 0\)</div>
+    <div class="two">
+      <div>
+        <div class="step"><span class="n">1</span><div>Ansatz \(y = e^{\lambda x}\) liefert die charakteristische Gleichung \(\lambda^2 + 4\lambda + 13 = 0\).</div></div>
+        <div class="step"><span class="n">2</span><div>pq-Formel: \(\lambda = -2 \pm\sqrt{4 - 13} = -2 \pm\sqrt{-9} = -2 \pm j3\). Wurzel aus negativer Zahl: \(\sqrt{-9} = \sqrt{9}\cdot\sqrt{-1} = 3j\).</div></div>
+        <div class="step"><span class="n">3</span><div>Euler: \(e^{(-2 + j3)x} = e^{-2x}\,e^{j3x} = e^{-2x}\left(\cos 3x + j\sin 3x\right)\). Real- und Imaginärteil sind je eine reelle Lösung.</div></div>
+        <div class="step"><span class="n">4</span><div>
+          \[ y_h(x) = e^{-2x}\left(C_1\cos(3x) + C_2\sin(3x)\right) \]</div></div>
+        <p class="muted">Allgemein: \(\lambda = \alpha \pm j\beta\) ergibt \(y_h = e^{\alpha x}(C_1\cos\beta x + C_2\sin\beta x)\). Der Realteil \(\alpha\) ist die Dämpfung, der Imaginärteil \(\beta\) die Kreisfrequenz.</p>
+      </div>
+      <figure>{{SVG_LAMBDA}}<figcaption>Die beiden Nullstellen sind zueinander konjugiert.</figcaption></figure>
+    </div>
+  </div>
+  <p>Genauso im Beispiel 2.4 C: \(\lambda^2 + 2\lambda + 5 = 0\) ergibt \(\lambda = -1 \pm j2\) und \(y_h = e^{-x}(C_1\cos 2x + C_2\sin 2x)\).</p>
+
+  <h3>Harmonische Anregung (2.4 B, Beispiel 3) – komplexe Kontrolle</h3>
+  <p>Für \(y'' - 3y' + 2y = 10\cos(2x)\) erwartet der Prüfer den Ansatz \(y_p = A\sin(2x) + B\cos(2x)\). Mit Zeigern kannst du dein Ergebnis in wenigen Zeilen kontrollieren:</p>
+  <div class="worked">
+    <div class="step"><span class="n">1</span><div>Komplex ansetzen: \(y_p = \mathrm{Re}\left(\underline A\,e^{j2x}\right)\). Ableiten heißt mal \(j2\): \(y' \to j2\underline A\), \(\ y'' \to (j2)^2\underline A = -4\underline A\).</div></div>
+    <div class="step"><span class="n">2</span><div>Einsetzen: \((-4 - j6 + 2)\,\underline A = 10\), also \(\underline A = \dfrac{10}{-2 - j6} = \dfrac{10(-2 + j6)}{4 + 36} = -\tfrac12 + j\tfrac32\).</div></div>
+    <div class="step"><span class="n">3</span><div>Realteil bilden: \(\mathrm{Re}\left((-\tfrac12 + j\tfrac32)(\cos 2x + j\sin 2x)\right) = -\tfrac12\cos(2x) - \tfrac32\sin(2x)\).</div></div>
+    <p>Mit dem reellen Ansatz musst du also auf <span class="result">\(A = -\tfrac32,\ B = -\tfrac12\)</span> kommen.</p>
+  </div>
+  <p class="muted">Den ausführlichen DGL-Teil (Trennung der Variablen, lineare DGL 1. und 2. Ordnung, Anfangswerte) mache ich dir auf Wunsch als eigenen Lernzettel.</p>
+</section>
+
+<!-- ===================================================== RECHNER -->
+<section id="rechner">
+  <h2>Rechner zur Selbstkontrolle</h2>
+  <p>Zum Nachprüfen deiner Ergebnisse. In der Klausur zählt der Rechenweg.</p>
+
+  <div class="calc">
+    <h3>Umrechnen</h3>
+    <div class="inputs">
+      <span class="row-label">kartesisch</span>
+      <label for="cx">Re x<input id="cx" type="number" step="any" value="3"></label>
+      <label for="cy">Im y<input id="cy" type="number" step="any" value="4"></label>
+    </div>
+    <div class="inputs">
+      <span class="row-label">polar</span>
+      <label for="cr">Betrag r<input id="cr" type="number" step="any" value="5"></label>
+      <label for="cp">Winkel φ in °<input id="cp" type="number" step="any" value="53.13"></label>
+    </div>
+    <dl class="kv" id="conv-out" style="margin-top:1rem"></dl>
+  </div>
+
+  <div class="calc">
+    <h3>Schwingungen addieren</h3>
+    <div class="inputs">
+      <span class="row-label">x₁</span>
+      <label for="a1">Amplitude<input id="a1" type="number" step="any" value="3"></label>
+      <label for="f1">Funktion<select id="f1"><option value="cos">cos</option><option value="sin">sin</option></select></label>
+      <label for="p1">Phase in °<input id="p1" type="number" step="any" value="0"></label>
+    </div>
+    <div class="inputs">
+      <span class="row-label">x₂</span>
+      <label for="a2">Amplitude<input id="a2" type="number" step="any" value="4"></label>
+      <label for="f2">Funktion<select id="f2"><option value="cos">cos</option><option value="sin">sin</option></select></label>
+      <label for="p2">Phase in °<input id="p2" type="number" step="any" value="90"></label>
+    </div>
+    <div class="presets" aria-label="Beispiele">
+      <button type="button" data-v="3,cos,0,4,cos,90">Anforderungsdokument</button>
+      <button type="button" data-v="4,sin,0,4,cos,0">Übung 7</button>
+      <button type="button" data-v="2,cos,60,2,cos,-60">Übung 8</button>
+      <button type="button" data-v="3,cos,30,-2,cos,0">Übung 9</button>
+    </div>
+    <div class="out">
+      <div><dl class="kv" id="ph-out"></dl></div>
+      <svg id="ph-plot" viewBox="-130 -130 260 260" role="img" aria-label="Zeigerdiagramm der beiden Schwingungen und ihrer Summe"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== FORMELSAMMLUNG -->
+<section id="formelsammlung">
+  <h2>Baustein für deine zwei A4-Seiten</h2>
+  <p>Der Komplex-Teil passt auf etwa ein Drittel einer Seite. Dann bleiben gut anderthalb Seiten für die Differentialgleichungen.</p>
+  <div class="sheet">
+    <h4>Grundlagen</h4>
+    <p>\(j^2 = -1,\ \frac1j = -j\) · \(z = x + jy = r(\cos\varphi + j\sin\varphi) = re^{j\varphi} = r\angle\varphi\) · \(\bar z = x - jy = re^{-j\varphi}\) · \(z\bar z = |z|^2\)</p>
+    <h4>Umrechnen</h4>
+    <p>\(r = \sqrt{x^2 + y^2}\) · \(\varphi = \arctan\frac yx\) (\(x &gt; 0\)), \(+180^\circ\) (II.), \(-180^\circ\) (III.), \(\pm 90^\circ\) (auf Im-Achse) · \(x = r\cos\varphi,\ y = r\sin\varphi\) · \(\varphi_{\text{rad}} = \varphi^\circ\cdot\frac{\pi}{180^\circ}\)</p>
+    <h4>Wertetabelle</h4>
+    <p>\(0^\circ, 30^\circ, 45^\circ, 60^\circ, 90^\circ\): \(\sin = \frac12\sqrt0,\ \frac12\sqrt1,\ \frac12\sqrt2,\ \frac12\sqrt3,\ \frac12\sqrt4\), \(\cos\) rückwärts</p>
+    <h4>Rechnen</h4>
+    <p>\(\pm\): Re mit Re, Im mit Im · \(\cdot\): \((ac - bd) + j(ad + bc)\) bzw. \(r_1r_2e^{j(\varphi_1+\varphi_2)}\) · \(\div\): mit \(\bar z_2\) erweitern bzw. \(\frac{r_1}{r_2}e^{j(\varphi_1-\varphi_2)}\) · \(z^n = r^ne^{jn\varphi}\)</p>
+    <h4>Euler</h4>
+    <p>\(e^{j\varphi} = \cos\varphi + j\sin\varphi\) · \(\cos\varphi = \frac12(e^{j\varphi} + e^{-j\varphi})\) · \(\sin\varphi = \frac{1}{2j}(e^{j\varphi} - e^{-j\varphi})\)</p>
+    <h4>Schwingungen</h4>
+    <p>\(\hat x\cos(\omega t + \varphi) \leftrightarrow \underline X = \hat xe^{j\varphi}\) · \(\sin(\alpha) = \cos(\alpha - 90^\circ)\), \(\ -\cos\alpha = \cos(\alpha + 180^\circ)\) · \(\underline X = \sum\underline X_k\) (kartesisch addieren) · \(x(t) = |\underline X|\cos(\omega t + \arg\underline X)\)</p>
+    <h4>Für die DGL</h4>
+    <p>\(\lambda = \alpha \pm j\beta \Rightarrow y_h = e^{\alpha x}(C_1\cos\beta x + C_2\sin\beta x)\) · \(\sqrt{-a} = j\sqrt a\)</p>
+  </div>
+</section>
+
+<!-- ===================================================== LERNPLAN -->
+<section id="lernplan">
+  <h2>Lernplan komplexe Zahlen</h2>
+  <p>Etwa vier Lerneinheiten. Danach Schwerpunkt auf die Differentialgleichungen legen.</p>
+  <ul class="checklist" id="plan">
+    <li><input type="checkbox" id="d1"><label for="d1"><strong>\(j\)-Schreibweise</strong> und Wertetabelle sicher, Grad ↔ Bogenmaß im Kopf für 30°, 45°, 60°, 90°, 180°.</label></li>
+    <li><input type="checkbox" id="d2"><label for="d2"><strong>1.1 Umrechnen</strong>: beide Beispiele und Übungen 1 bis 4, besonders den III. Quadranten.</label></li>
+    <li><input type="checkbox" id="d3"><label for="d3"><strong>1.2 Zahlenebene</strong>: \(z_1, z_2\) von Hand zeichnen mit allen Beschriftungen.</label></li>
+    <li><input type="checkbox" id="d4"><label for="d4"><strong>1.3 Rechnen</strong>: Beispiel a bis e und Übungen 5 und 6, Divisionen per Probe kontrollieren.</label></li>
+    <li><input type="checkbox" id="d5"><label for="d5"><strong>1.4 Schwingungen</strong>: Beispiel a bis e ohne Vorlage, dann Übungen 7 bis 10 und mit dem Rechner prüfen.</label></li>
+    <li><input type="checkbox" id="d6"><label for="d6"><strong>Brücke zur DGL</strong>: \(\lambda = -2\pm j3\) herleiten und \(y_h\) aufschreiben.</label></li>
+    <li><input type="checkbox" id="d7"><label for="d7"><strong>Formelsammlung</strong>: Baustein oben von Hand auf deine A4-Seite übertragen.</label></li>
+  </ul>
+  <p class="muted">Die Häkchen werden nur in diesem Browser gespeichert.</p>
+</section>
+
+<footer>
+  Grundlage: E-Mail des Prüfers und Dokument „Prüfungsvorbereitung – Technische Mathematik am 14.12.2026“, ergänzt um eigene Übungen. Alle Ergebnisse wurden mit einem Computeralgebrasystem nachgerechnet.
+</footer>
+</main>
+
+<script>
+(function () {
+  document.querySelectorAll('#plan input[type=checkbox]').forEach(function (cb) {
+    try { cb.checked = localStorage.getItem('kzd-' + cb.id) === '1'; } catch (e) {}
+    cb.addEventListener('change', function () {
+      try { localStorage.setItem('kzd-' + cb.id, cb.checked ? '1' : '0'); } catch (e) {}
+    });
+  });
+
+  var D = 180 / Math.PI;
+  function $(id) { return document.getElementById(id); }
+  function num(v, d) {
+    if (d == null) d = 4;
+    if (Math.abs(v) < 1e-10) v = 0;
+    var f = Math.pow(10, d);
+    return (Math.round(v * f) / f).toString().replace('-', '−').replace('.', ',');
+  }
+  function cart(x, y) {
+    if (Math.abs(x) < 1e-10) x = 0; if (Math.abs(y) < 1e-10) y = 0;
+    if (y === 0) return num(x);
+    var im = 'j' + num(Math.abs(y));
+    if (x === 0) return (y < 0 ? '−' : '') + im;
+    return num(x) + (y < 0 ? ' − ' : ' + ') + im;
+  }
+  function quad(x, y) {
+    if (x === 0 && y === 0) return 'Ursprung';
+    if (x === 0) return y > 0 ? 'positive Im-Achse' : 'negative Im-Achse';
+    if (y === 0) return x > 0 ? 'positive Re-Achse' : 'negative Re-Achse';
+    return x > 0 ? (y > 0 ? 'I' : 'IV') : (y > 0 ? 'II' : 'III');
+  }
+  function fill(dl, rows) {
+    dl.innerHTML = '';
+    rows.forEach(function (r) {
+      var dt = document.createElement('dt'); dt.textContent = r[0];
+      var dd = document.createElement('dd'); dd.textContent = r[1];
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+  }
+
+  // Umrechnen
+  function fromCart() {
+    var x = parseFloat($('cx').value) || 0, y = parseFloat($('cy').value) || 0;
+    var r = Math.hypot(x, y), p = Math.atan2(y, x);
+    $('cr').value = num(r, 4).replace(',', '.').replace('−', '-');
+    $('cp').value = num(p * D, 4).replace(',', '.').replace('−', '-');
+    showConv(x, y, r, p);
+  }
+  function fromPolar() {
+    var r = parseFloat($('cr').value) || 0, p = (parseFloat($('cp').value) || 0) / D;
+    var x = r * Math.cos(p), y = r * Math.sin(p);
+    $('cx').value = num(x, 4).replace(',', '.').replace('−', '-');
+    $('cy').value = num(y, 4).replace(',', '.').replace('−', '-');
+    showConv(x, y, r, Math.atan2(y, x));
+  }
+  function showConv(x, y, r, p) {
+    fill($('conv-out'), [
+      ['kartesisch', 'z = ' + cart(x, y)],
+      ['Quadrant', quad(Math.abs(x) < 1e-10 ? 0 : x, Math.abs(y) < 1e-10 ? 0 : y)],
+      ['Betrag', '|z| = ' + num(r)],
+      ['Argument', num(p * D) + '° = ' + num(p) + ' rad = ' + num(p / Math.PI) + '·π'],
+      ['trigonometrisch', num(r) + '·(cos(' + num(p * D, 2) + '°) + j·sin(' + num(p * D, 2) + '°))'],
+      ['exponentiell', num(r) + '·e^(j·' + num(p) + ')']
+    ]);
+  }
+  ['cx', 'cy'].forEach(function (id) { $(id).addEventListener('input', fromCart); });
+  ['cr', 'cp'].forEach(function (id) { $(id).addEventListener('input', fromPolar); });
+
+  // Schwingungen
+  function el(tag, attrs, text) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function vec(svg, x, y, s, color, label, width) {
+    var X = x * s, Y = -y * s, a = Math.atan2(Y, X), L = Math.hypot(X, Y);
+    if (L < 1) return;
+    svg.appendChild(el('line', { x1: 0, y1: 0, x2: X - 6 * Math.cos(a), y2: Y - 6 * Math.sin(a), style: 'stroke:' + color + ';stroke-width:' + (width || 2) }));
+    svg.appendChild(el('path', { d: 'M' + X + ',' + Y + ' L' + (X - 9 * Math.cos(a - .4)) + ',' + (Y - 9 * Math.sin(a - .4)) + ' L' + (X - 9 * Math.cos(a + .4)) + ',' + (Y - 9 * Math.sin(a + .4)) + ' Z', style: 'fill:' + color }));
+    svg.appendChild(el('text', { x: X + 6 * Math.cos(a) - (Math.cos(a) < 0 ? 22 : 0), y: Y + 6 * Math.sin(a) + 4, style: 'fill:' + color + ';font:600 11px var(--font-body)' }, label));
+  }
+  function phasor(k) {
+    var a = parseFloat($('a' + k).value) || 0, f = $('f' + k).value, p = parseFloat($('p' + k).value) || 0;
+    var pc = f === 'sin' ? p - 90 : p;
+    return { a: a, f: f, p: p, pc: pc, x: a * Math.cos(pc / D), y: a * Math.sin(pc / D) };
+  }
+  function updatePh() {
+    var u = phasor(1), v = phasor(2);
+    var X = u.x + v.x, Y = u.y + v.y, A = Math.hypot(X, Y), P = Math.atan2(Y, X);
+    var rows = [];
+    [u, v].forEach(function (q, i) {
+      var name = 'X' + (i ? '₂' : '₁');
+      rows.push([name, num(q.a) + '·e^(j·' + num(q.pc, 2) + '°)' + (q.f === 'sin' ? '  (sin → cos: −90°)' : '') + ' = ' + cart(q.x, q.y)]);
+    });
+    rows.push(['X = X₁ + X₂', cart(X, Y)]);
+    rows.push(['Amplitude', num(A)]);
+    rows.push(['Phase', A < 1e-10 ? '–' : num(P * D, 2) + '° = ' + num(P) + ' rad']);
+    rows.push(['x(t)', A < 1e-10 ? '0' : num(A) + '·cos(ωt ' + (P < 0 ? '− ' : '+ ') + num(Math.abs(P * D), 2) + '°)']);
+    fill($('ph-out'), rows);
+
+    var svg = $('ph-plot');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var m = Math.max(Math.hypot(u.x, u.y), Math.hypot(v.x, v.y), A, 1e-9), s = 100 / m;
+    svg.appendChild(el('line', { x1: -125, y1: 0, x2: 125, y2: 0, style: 'stroke:var(--muted);stroke-width:1' }));
+    svg.appendChild(el('line', { x1: 0, y1: -125, x2: 0, y2: 125, style: 'stroke:var(--muted);stroke-width:1' }));
+    svg.appendChild(el('text', { x: 108, y: 14, style: 'fill:var(--re);font:600 11px var(--font-display)' }, 'Re'));
+    svg.appendChild(el('text', { x: 6, y: -114, style: 'fill:var(--im);font:600 11px var(--font-display)' }, 'Im'));
+    svg.appendChild(el('polyline', { points: (u.x * s) + ',' + (-u.y * s) + ' ' + (X * s) + ',' + (-Y * s) + ' ' + (v.x * s) + ',' + (-v.y * s), style: 'fill:none;stroke:var(--muted);stroke-dasharray:4 4' }));
+    vec(svg, u.x, u.y, s, 'var(--re)', 'X₁');
+    vec(svg, v.x, v.y, s, 'var(--im)', 'X₂');
+    vec(svg, X, Y, s, 'var(--ink)', 'X', 2.6);
+  }
+  ['a1', 'f1', 'p1', 'a2', 'f2', 'p2'].forEach(function (id) { $(id).addEventListener('input', updatePh); $(id).addEventListener('change', updatePh); });
+  document.querySelectorAll('.presets button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = b.dataset.v.split(',');
+      $('a1').value = v[0]; $('f1').value = v[1]; $('p1').value = v[2];
+      $('a2').value = v[3]; $('f2').value = v[4]; $('p2').value = v[5];
+      updatePh();
+    });
+  });
+  fromCart();
+  updatePh();
+})();
+</script>

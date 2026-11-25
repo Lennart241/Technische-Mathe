@@ -89,7 +89,9 @@ a { color: var(--re); }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.15rem; margin: 1rem 0; }
 .recipe { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1.15rem .9rem 1.15rem; margin: 1rem 0; }
 .recipe h4 { margin-top: .2rem; font-size: .8rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--re); }
-.recipe ol { margin: .3rem 0 .2rem; padding-left: 1.3rem; display: grid; gap: .35rem; }
+.recipe ol { margin: .3rem 0 .2rem; padding-left: 1.4rem; list-style: decimal; }
+.recipe ol li { margin: .35rem 0; padding-left: .2rem; }
+.recipe ol li::marker { color: var(--re); font-family: var(--font-mono); font-size: .85em; }
 .trap { background: var(--warn-tint); border-radius: 10px; padding: .8rem 1.15rem; margin: 1rem 0; }
 .trap h4 { margin-top: .1rem; font-size: .8rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--warn); }
 .trap ul { margin: .3rem 0; padding-left: 1.2rem; display: grid; gap: .3rem; }

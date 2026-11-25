@@ -16,6 +16,7 @@ class Plane:
         self.w = (xmax - xmin) * s + 2 * self.pad
         self.h = (ymax - ymin) * s + 2 * self.pad
         self.parts = []
+        self.imfmt = lambda v: f"{fmt(v)}i"
 
     def X(self, x):
         return self.pad + (x - self.xmin) * self.s
@@ -57,7 +58,7 @@ class Plane:
         while y <= self.ymax:
             if y != 0:
                 p.append(f'<line x1="{ay-4:.1f}" y1="{self.Y(y):.1f}" x2="{ay+4:.1f}" y2="{self.Y(y):.1f}" class="ax"/>')
-                p.append(f'<text x="{ay-7:.1f}" y="{self.Y(y)+4:.1f}" class="t" text-anchor="end">{fmt(y)}i</text>')
+                p.append(f'<text x="{ay-7:.1f}" y="{self.Y(y)+4:.1f}" class="t" text-anchor="end">{self.imfmt(y)}</text>')
             y += self.step
         self.parts.append("\n".join(p))
 
