@@ -1,0 +1,724 @@
+<title>DGL Teil 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+{{STYLE}}
+<style>
+svg.timeplot { width: 100%; height: auto; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+svg .fam { fill: none; stroke: var(--muted); stroke-width: 1.2; opacity: .55; }
+svg .spec { fill: none; stroke: var(--re); stroke-width: 2.6; }
+svg .asym { fill: none; stroke: var(--im); stroke-width: 1.4; stroke-dasharray: 6 5; }
+svg .pt-spec { fill: var(--im); }
+.legend.curves span::before { border-top-style: solid; }
+.legend.curves .lfam::before { border-top-color: var(--muted); }
+.legend.curves .lspec::before { border-top-color: var(--re); border-top-width: 3px; }
+.legend.curves .lasym::before { border-top-color: var(--im); border-top-style: dashed; }
+.plan-parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.plan-parts > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1.1rem; min-width: 0; }
+.plan-parts .now { border-color: var(--re); box-shadow: inset 0 0 0 1px var(--re); }
+.plan-parts h4 { margin: 0 0 .3rem; }
+.plan-parts ul { margin: .3rem 0 0; padding-left: 1.1rem; }
+.flow { display: grid; gap: .6rem; margin: 1rem 0; }
+.flow .q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .75rem 1rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: .35rem; }
+.flow .q strong { font-family: var(--font-display); }
+.flow .ans { display: flex; flex-wrap: wrap; gap: .4rem .6rem; font-size: .92rem; }
+.flow .ans span { background: var(--tint); border-radius: 6px; padding: .1rem .5rem; }
+.flow .ans span.stop { background: var(--warn-tint); }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: .72rem; border-radius: 4px; padding: .05rem .4rem; margin-left: .3rem; vertical-align: middle; }
+.pill.new { color: var(--re); background: var(--tint); }
+.pill.old { color: var(--warn); background: var(--warn-tint); }
+.slider { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin: .6rem 0; font-family: var(--font-mono); font-size: .88rem; }
+.slider input[type=range] { flex: 1 1 200px; accent-color: var(--re); }
+#lin-plot { width: 100%; height: auto; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.15rem; }
+.sheet h4 { margin: .9rem 0 .2rem; font-size: .82rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--re); }
+.sheet h4:first-child { margin-top: 0; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+  svg: { fontCache: "global" },
+  options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Technische Mathematik · Klausur am 14.12.2026 · Differentialgleichungen</div>
+  <h1>DGL Teil 1: <span class="re">erste Ordnung</span></h1>
+  <p class="lead">Grundbegriffe, Klassifizieren, Trennung der Variablen und lineare DGL erster Ordnung. Grundlage ist das Anforderungsdokument des neuen Prüfers (Abschnitte 2.1 bis 2.3). Dazu kommen die passenden Aufgaben aus den fünf alten Klausuren als Übung. <strong>Alle Beispiele sind komplett vorgerechnet.</strong></p>
+</header>
+</div>
+
+<nav class="toc" aria-label="Abschnitte">
+  <ul>
+    <li><a href="#ueberblick">Überblick</a></li>
+    <li><a href="#grundbegriffe">1 Grundbegriffe</a></li>
+    <li><a href="#klassifizieren">2 Klassifizieren</a></li>
+    <li><a href="#integrale">3 Integrale</a></li>
+    <li><a href="#trennung">4 Trennung</a></li>
+    <li><a href="#linear">5 Linear 1. Ordnung</a></li>
+    <li><a href="#variation">6 Variation</a></li>
+    <li><a href="#mischtraining">7 Mischtraining</a></li>
+    <li><a href="#formelsammlung">Formelsammlung</a></li>
+    <li><a href="#lernplan">Lernplan</a></li>
+  </ul>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================================================== ÜBERBLICK -->
+<section id="ueberblick">
+  <h2>Worum es geht</h2>
+  <p>Eine <strong>Differentialgleichung</strong> (DGL) ist eine Gleichung, in der eine <em>gesuchte Funktion</em> \(y(x)\) zusammen mit ihren Ableitungen vorkommt. Die Lösung ist also keine Zahl, sondern eine Funktion. Beispiel: \(y' = 2y\) fragt „Welche Funktion ist abgeleitet doppelt so groß wie sie selbst?“ Antwort: \(y = C\,e^{2x}\).</p>
+
+  <div class="plan-parts">
+    <div class="now">
+      <h4>Teil 1 – dieser Lernzettel</h4>
+      <ul>
+        <li>2.1 Ordnung, linear, homogen erkennen</li>
+        <li>2.2 Trennung der Variablen mit Substitution</li>
+        <li>2.3 Lineare DGL 1. Ordnung</li>
+        <li>Anfangswertprobleme 1. Ordnung</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Teil 2 – folgt</h4>
+      <ul>
+        <li>2.4 A Charakteristische Gleichung, drei Fälle</li>
+        <li>2.4 B Ansätze für die partikuläre Lösung</li>
+        <li>2.4 C Allgemeine und spezielle Lösung</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Welches Verfahren? – die Entscheidung in drei Fragen</h3>
+  <p>Das ist der wichtigste Schritt in jeder Aufgabe. Präge dir diese Reihenfolge ein:</p>
+  <div class="flow">
+    <div class="q"><strong>1. Welche Ordnung hat die DGL?</strong>
+      <div class="ans"><span>höchste Ableitung \(y'\) → weiter mit Frage 2</span><span class="stop">\(y''\) mit konstanten Koeffizienten → Teil 2</span></div></div>
+    <div class="q"><strong>2. Lässt sie sich als \(y' = f(x)\cdot g(y)\) schreiben?</strong>
+      <div class="ans"><span>ja → <a href="#trennung">Trennung der Variablen</a></span><span>nein → Frage 3</span></div></div>
+    <div class="q"><strong>3. Ist sie linear, also \(y' + a(x)\,y = s(x)\)?</strong>
+      <div class="ans"><span>\(a\) konstant → <a href="#linear">homogene + partikuläre Lösung</a></span><span>\(a\) hängt von \(x\) ab → <a href="#variation">Variation der Konstanten</a></span><span class="stop">nichtlinear und nicht trennbar → im neuen Stoff nicht gefordert</span></div></div>
+  </div>
+  <p class="muted">Manche DGL erfüllen Frage 2 <em>und</em> 3, z. B. \(y' + 2y = 6\). Dann darfst du dir das Verfahren aussuchen. Beide liefern dasselbe Ergebnis.</p>
+
+  <div class="trap">
+    <h4>Vergleich mit den alten Klausuren</h4>
+    <ul>
+      <li>In den alten Klausuren war Aufgabe 2 a immer „Klassifizieren Sie … und bestimmen Sie jeweils die allgemeine Lösung“ mit drei DGL erster Ordnung (30 Punkte), dazu ein Anfangswertproblem 1. Ordnung in 2 c i. Das passt genau zu diesem Teil.</li>
+      <li>Die Bernoulli-DGL und Substitutionen wie \(u = x\cdot y^2\) (alte Teilaufgabe d) stehen <strong>nicht</strong> im neuen Anforderungsdokument. Die lasse ich weg.</li>
+      <li>Der neue Prüfer betont Substitution <em>beim Integrieren</em> (z. B. \(u = 1 + x^2\)). Dafür gibt es hier einen eigenen <a href="#integrale">Werkzeugkasten</a>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================================================== 1 GRUNDBEGRIFFE -->
+<section id="grundbegriffe">
+  <h2>1 · Grundbegriffe</h2>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Begriff</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
+    <tbody>
+      <tr><td>Ordnung</td><td>höchste vorkommende Ableitung</td><td>\(y'' + y = 0\) hat Ordnung 2</td></tr>
+      <tr><td>allgemeine Lösung</td><td>alle Lösungen, mit so vielen freien Konstanten wie die Ordnung</td><td>\(y = C\,e^{-3x}\)</td></tr>
+      <tr><td>Anfangsbedingung</td><td>vorgegebener Wert, z. B. \(y(0) = 2\)</td><td>legt \(C\) fest</td></tr>
+      <tr><td>Anfangswertproblem (AWP)</td><td>DGL + Anfangsbedingung(en)</td><td>\(y' = 2xy,\ y(0) = 2\)</td></tr>
+      <tr><td>spezielle (partikuläre) Lösung des AWP</td><td>die eine Lösung, die auch die Anfangsbedingung erfüllt</td><td>\(y = 2e^{x^2}\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Schreibweisen:</strong> \(y' = \dfrac{dy}{dx}\). Hängt die Funktion von der Zeit ab, schreibt man oft Punkte: \(\dot y = \dfrac{dy}{dt}\), \(\ddot y = \dfrac{d^2y}{dt^2}\). Das war in den alten Klausuren üblich und ändert nichts an der Rechnung.</p>
+
+  <h3>Probe durch Einsetzen</h3>
+  <p>Ob eine Funktion eine DGL löst, prüfst du immer gleich: ableiten, einsetzen, vereinfachen.</p>
+  <div class="worked">
+    <div class="src">Löst \(y = C\,e^{-3x}\) die DGL \(y' + 3y = 0\)?</div>
+    \[ y' = -3C\,e^{-3x} \quad\Rightarrow\quad y' + 3y = -3Ce^{-3x} + 3Ce^{-3x} = 0 \quad\checkmark \]
+    <p>Das klappt für jedes \(C\). Darum heißt \(y = Ce^{-3x}\) die <em>allgemeine</em> Lösung.</p>
+  </div>
+  <div class="good">
+    <h4>Tipp für die Klausur</h4>
+    <p>Die Probe kostet eine Minute und findet fast jeden Vorzeichenfehler. Mach sie bei jeder Lösung wenigstens im Kopf.</p>
+  </div>
+</section>
+
+<!-- ===================================================== 2 KLASSIFIZIEREN -->
+<section id="klassifizieren">
+  <h2>2 · Klassifizieren <span class="tag">2.1 Prüfer</span></h2>
+  <p>Gefragt sind <strong>Ordnung</strong>, <strong>linear oder nichtlinear</strong> und bei linearen DGL <strong>homogen oder inhomogen</strong>.</p>
+
+  <div class="recipe">
+    <h4>So gehst du vor</h4>
+    <ol>
+      <li><strong>Ordnung:</strong> höchste Ableitung suchen.</li>
+      <li><strong>Linear?</strong> Die gesuchte Funktion \(y\) und alle Ableitungen kommen nur „pur“ und in erster Potenz vor: kein \(y^2\), kein \(y\cdot y'\), kein \(\sqrt y\), \(e^y\), \(\sin y\), \(\frac1y\). Die Faktoren davor dürfen von \(x\) abhängen (\(x\,y'\), \(e^x y\) sind erlaubt).</li>
+      <li><strong>Homogen?</strong> (nur bei linear) Alle Terme mit \(y\) auf die linke Seite. Bleibt rechts \(0\), ist sie homogen. Steht rechts etwas, das nur von \(x\) abhängt (die <em>Störfunktion</em>), ist sie inhomogen.</li>
+      <li>Optional: konstante Koeffizienten? Trennbar?</li>
+    </ol>
+  </div>
+
+  <h3>Beispiel aus dem Anforderungsdokument</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>DGL</th><th>Ordnung</th><th>linear?</th><th>homogen?</th><th>Begründung</th></tr></thead>
+    <tbody>
+      <tr><td>a) \(y' + 3y = 0\)</td><td class="num">1</td><td>linear</td><td>homogen</td><td>\(y, y'\) nur einfach, rechts 0</td></tr>
+      <tr><td>b) \(y'' + 4y' + 5y = 8\)</td><td class="num">2</td><td>linear</td><td>inhomogen</td><td>Störfunktion \(s = 8\), konstante Koeffizienten</td></tr>
+      <tr><td>c) \(y' = x\,y^2\)</td><td class="num">1</td><td>nichtlinear</td><td>–</td><td>\(y^2\). Aber trennbar!</td></tr>
+      <tr><td>d) \(y''' + 2y' = 0\)</td><td class="num">3</td><td>linear</td><td>homogen</td><td>höchste Ableitung \(y'''\), rechts 0</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <h4>Typische Fehler</h4>
+    <ul>
+      <li>\(x^2 y'\) für nichtlinear halten. Nichtlinear wird es nur durch die gesuchte Funktion, nicht durch \(x\).</li>
+      <li>Bei „homogen“ nicht umsortiert: \(y' = 3y\) ist homogen (\(y' - 3y = 0\)), \(y' = 3y + x\) ist inhomogen.</li>
+      <li>Bei nichtlinearen DGL nach homogen/inhomogen gefragt: Die Einteilung gibt es nur bei linearen.</li>
+    </ul>
+  </div>
+
+  <h3>Üben mit den alten Klausuren</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Klassifiziere alle acht</span>DGL aus den Klausuren 2024 bis 2026</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>DGL</th><th>Ord.</th><th>Einordnung</th><th>Verfahren</th></tr></thead>
+        <tbody>
+          <tr><td>\(y' = \sin x\cdot e^{-2y}\)</td><td class="num">1</td><td>nichtlinear (\(e^{-2y}\))</td><td>trennbar</td></tr>
+          <tr><td>\(x\,y' - y = x + 2\)</td><td class="num">1</td><td>linear, inhomogen</td><td>Variation der Konstanten</td></tr>
+          <tr><td>\(2y' + x\,y = 6x\)</td><td class="num">1</td><td>linear, inhomogen</td><td>linear oder trennbar</td></tr>
+          <tr><td>\(\frac1x y' = y(1 - y^2)\)</td><td class="num">1</td><td>nichtlinear (\(y^3\))</td><td>trennbar</td></tr>
+          <tr><td>\(y' = 2x^2\sqrt{y}\)</td><td class="num">1</td><td>nichtlinear (\(\sqrt y\))</td><td>trennbar</td></tr>
+          <tr><td>\(x^2y' + y^2 = x\,y\)</td><td class="num">1</td><td>nichtlinear (\(y^2\))</td><td>Bernoulli, nicht mehr gefordert</td></tr>
+          <tr><td>\(\ddot y - 6\dot y + 9y = 31\sin 2t\)</td><td class="num">2</td><td>linear, inhomogen, konst. Koeff.</td><td>Teil 2</td></tr>
+          <tr><td>\(2\dddot y - 2\ddot y + \dot y = 3t^2 + 1\)</td><td class="num">3</td><td>linear, inhomogen, konst. Koeff.</td><td>Teil 2</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== 3 INTEGRALE -->
+<section id="integrale">
+  <h2>3 · Integrations-Werkzeugkasten</h2>
+  <p>Beim Lösen von DGL erster Ordnung wird am Ende fast immer integriert. Die meisten Fehler passieren dabei, nicht bei der DGL selbst. Das hier ist der Ausschnitt aus deiner Mathe-1-Formelsammlung, der wirklich gebraucht wird.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>\(f\)</th><th>\(\int f\,dx\)</th><th>\(f\)</th><th>\(\int f\,dx\)</th></tr></thead>
+    <tbody>
+      <tr><td>\(x^n\ (n \ne -1)\)</td><td>\(\frac{x^{n+1}}{n+1}\)</td><td>\(\frac1x\)</td><td>\(\ln|x|\)</td></tr>
+      <tr><td>\(e^{ax}\)</td><td>\(\frac1a e^{ax}\)</td><td>\(\frac{1}{1+x^2}\)</td><td>\(\arctan x\)</td></tr>
+      <tr><td>\(\sin x\)</td><td>\(-\cos x\)</td><td>\(\cos x\)</td><td>\(\sin x\)</td></tr>
+      <tr><td>\(\tan x = \frac{\sin x}{\cos x}\)</td><td>\(-\ln|\cos x|\)</td><td>\(\frac{1}{\tan x} = \frac{\cos x}{\sin x}\)</td><td>\(\ln|\sin x|\)</td></tr>
+      <tr><td>\(\frac{1}{\sqrt x} = x^{-1/2}\)</td><td>\(2\sqrt x\)</td><td>\(\frac{1}{ax+b}\)</td><td>\(\frac1a\ln|ax+b|\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Die drei Tricks, die immer wieder vorkommen</h3>
+  <div class="two">
+    <div class="recipe">
+      <h4>A · Logarithmische Integration</h4>
+      <p>Steht im Zähler die Ableitung des Nenners:</p>
+      \[ \int\frac{f'(x)}{f(x)}\,dx = \ln|f(x)| + C \]
+      <p>Beispiele: \(\int\frac{2x}{1+x^2}dx = \ln(1+x^2)\), \(\ \int\frac{x}{1+x^2}dx = \frac12\ln(1+x^2)\), \(\ \int\frac{1}{y-2}dy = \ln|y-2|\).</p>
+    </div>
+    <div class="recipe">
+      <h4>B · Substitution</h4>
+      <ol>
+        <li>Inneren Ausdruck \(u = g(x)\) wählen, z. B. \(u = 1 + x^2\).</li>
+        <li>\(\frac{du}{dx} = g'(x)\), also \(dx = \frac{du}{g'(x)}\).</li>
+        <li>Einsetzen, alle \(x\) müssen verschwinden.</li>
+        <li>Integrieren, dann \(u\) zurückersetzen.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="worked">
+    <div class="src">Substitution aus dem Anforderungsdokument: \(\displaystyle\int\frac{x}{1+x^2}\,dx\) mit \(u = 1 + x^2\)</div>
+    \[ u = 1 + x^2,\quad \frac{du}{dx} = 2x \Rightarrow dx = \frac{du}{2x} \qquad\int\frac{x}{u}\cdot\frac{du}{2x} = \frac12\int\frac{du}{u} = \frac12\ln|u| = \frac12\ln(1 + x^2) + C \]
+  </div>
+  <div class="recipe">
+    <h4>C · Partialbruchzerlegung (seltener)</h4>
+    <p>Für Brüche wie \(\frac{1}{y(1-y^2)}\): Nenner in Faktoren zerlegen, Ansatz \(\frac{A}{y} + \frac{B}{1-y} + \frac{C}{1+y}\), Nullstellen des Nenners einsetzen, dann jeden Teil mit \(\ln\) integrieren. Kam in der Klausur vom 21.06.2024 vor.</p>
+  </div>
+
+  <h3>Nach dem Integrieren: nach \(y\) auflösen</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Regel</th><th>Anwendung</th></tr></thead>
+    <tbody>
+      <tr><td>\(\ln|y| = A \iff |y| = e^{A}\)</td><td>beide Seiten „hoch e“</td></tr>
+      <tr><td>\(e^{u + C} = e^u\cdot e^C\)</td><td>Konstante abtrennen</td></tr>
+      <tr><td>\(\pm e^C =: K\)</td><td>neue Konstante, der Betrag verschwindet darin</td></tr>
+      <tr><td>\(\ln a + \ln b = \ln(ab),\quad k\ln a = \ln a^k\)</td><td>Logarithmen zusammenfassen</td></tr>
+      <tr><td>\(\arctan y = A \iff y = \tan A\)</td><td>Umkehrfunktion anwenden</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ===================================================== 4 TRENNUNG -->
+<section id="trennung">
+  <h2>4 · Trennung der Variablen <span class="tag">2.2 Prüfer</span></h2>
+  <p><strong>Wann?</strong> Immer wenn sich die rechte Seite als Produkt aus einem reinen \(x\)-Teil und einem reinen \(y\)-Teil schreiben lässt:</p>
+  \[ y' = f(x)\cdot g(y) \]
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>DGL</th><th>trennbar?</th><th>\(f(x)\cdot g(y)\)</th></tr></thead>
+    <tbody>
+      <tr><td>\(y' = 2xy\)</td><td class="num">ja</td><td>\(2x\cdot y\)</td></tr>
+      <tr><td>\(y' = 3e^{x+y}\)</td><td class="num">ja</td><td>\(3e^x\cdot e^y\) &nbsp;(Potenzgesetz!)</td></tr>
+      <tr><td>\(y' = 6 - 2y\)</td><td class="num">ja</td><td>\(1\cdot(6 - 2y)\)</td></tr>
+      <tr><td>\(\tan x\cdot y' = 1 + y\)</td><td class="num">ja</td><td>\(\frac{1}{\tan x}\cdot(1+y)\)</td></tr>
+      <tr><td>\(y' = x + y\)</td><td class="num">nein</td><td>Summe lässt sich nicht zerlegen → linear lösen</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="recipe">
+    <h4>Rezept</h4>
+    <ol>
+      <li>\(y'\) als \(\frac{dy}{dx}\) schreiben.</li>
+      <li><strong>Trennen:</strong> alles mit \(y\) samt \(dy\) nach links, alles mit \(x\) samt \(dx\) nach rechts: \(\dfrac{dy}{g(y)} = f(x)\,dx\).</li>
+      <li><strong>Integrieren:</strong> beide Seiten. Nur <em>eine</em> Konstante \(C\), auf der rechten Seite.</li>
+      <li><strong>Nach \(y\) auflösen</strong> (Tabelle oben).</li>
+      <li><strong>Konstante Lösungen</strong> prüfen: Wo \(g(y) = 0\) ist, hast du beim Teilen eine Lösung verloren. Meist ist sie mit \(K = 0\) wieder enthalten.</li>
+      <li><strong>Anfangsbedingung</strong> einsetzen und \(C\) bestimmen. Erst ganz am Ende.</li>
+      <li><strong>Probe.</strong></li>
+    </ol>
+  </div>
+
+  <h3>Beispiel 1 aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">\(y' = 2xy\), &nbsp;\(y(0) = 2\)</div>
+    <div class="two">
+      <div>
+        <div class="step"><span class="n">a</span><div><strong>Trennen:</strong> \(\dfrac{dy}{dx} = 2x\,y \;\Rightarrow\; \dfrac{1}{y}\,dy = 2x\,dx\) &nbsp;(für \(y \ne 0\))</div></div>
+        <div class="step"><span class="n">b</span><div><strong>Integrieren:</strong> \(\displaystyle\int\frac1y\,dy = \int 2x\,dx \;\Rightarrow\; \ln|y| = x^2 + C\)</div></div>
+        <div class="step"><span class="n">c</span><div><strong>Allgemeine Lösung:</strong> \(|y| = e^{x^2 + C} = e^C\cdot e^{x^2}\). Mit \(K = \pm e^C\):
+          \[ y = K\,e^{x^2},\quad K\in\mathbb R \]
+          \(K = 0\) liefert \(y = 0\), die beim Teilen verlorene Lösung.</div></div>
+        <div class="step"><span class="n">d</span><div><strong>Spezielle Lösung:</strong> \(y(0) = K\,e^0 = K = 2\), also <span class="result">\(y = 2\,e^{x^2}\)</span></div></div>
+        <p class="muted">Probe: \(y' = 2\cdot 2x\,e^{x^2} = 2x\cdot y\) ✓</p>
+      </div>
+      <figure>
+        {{SVG_FAM_SEP}}
+        <div class="legend curves"><span class="lfam">andere Werte für K</span><span class="lspec">K = 2</span></div>
+        <figcaption>Jede graue Kurve löst die DGL. Die Anfangsbedingung wählt genau eine aus.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <h3>Beispiel 2 aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">\(y' = \dfrac{x(1 + y^2)}{1 + x^2}\)</div>
+    <div class="step"><span class="n">1</span><div><strong>Trennen:</strong> \(\dfrac{dy}{1 + y^2} = \dfrac{x}{1 + x^2}\,dx\). Hier ist \(1 + y^2\) nie null, es geht also keine Lösung verloren.</div></div>
+    <div class="step"><span class="n">2</span><div><strong>Linke Seite:</strong> Grundintegral \(\displaystyle\int\frac{dy}{1 + y^2} = \arctan y\)</div></div>
+    <div class="step"><span class="n">3</span><div><strong>Rechte Seite</strong> mit \(u = 1 + x^2\), \(du = 2x\,dx\): \(\displaystyle\int\frac{x}{1+x^2}dx = \frac12\int\frac{du}{u} = \frac12\ln(1 + x^2)\)</div></div>
+    <div class="step"><span class="n">4</span><div>\(\arctan y = \tfrac12\ln(1 + x^2) + C\). Auf beide Seiten \(\tan\) anwenden:
+      \[ y = \tan\!\left(\tfrac12\ln(1 + x^2) + C\right) \]</div></div>
+    <p class="muted">Kein Betrag im \(\ln\) nötig, weil \(1 + x^2 &gt; 0\).</p>
+  </div>
+
+  <h3>Üben – allgemeine Lösungen aus den alten Klausuren</h3>
+  <p class="muted">Nach Schwierigkeit sortiert.</p>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · a iii</span>\(y' = -\dfrac{x^2}{2y}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(2y\,dy = -x^2\,dx \;\Rightarrow\; y^2 = -\tfrac{x^3}{3} + C\)</p>
+      <p><span class="result">\(y = \pm\sqrt{C - \tfrac{x^3}{3}}\)</span> &nbsp;(das Vorzeichen legt eine Anfangsbedingung fest)</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">Anforderungsdokument 2.1 c</span>\(y' = x\,y^2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(y^{-2}\,dy = x\,dx \;\Rightarrow\; -\tfrac1y = \tfrac{x^2}{2} + C \;\Rightarrow\; y = -\dfrac{1}{\frac{x^2}{2} + C} = -\dfrac{2}{x^2 + K}\) &nbsp;mit \(K = 2C\)</p>
+      <p>Zusätzlich die konstante Lösung <span class="result">\(y = 0\)</span>, die hier <em>nicht</em> in der Formel steckt. Ein Beispiel, warum Schritt 5 im Rezept wichtig ist.</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · a i</span>\(y' = \cos x\cdot e^{y}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(e^{-y}\,dy = \cos x\,dx \;\Rightarrow\; -e^{-y} = \sin x + C \;\Rightarrow\; e^{-y} = K - \sin x\) &nbsp;(\(K = -C\))</p>
+      <p>\(\ln\) anwenden: <span class="result">\(y = -\ln(K - \sin x)\)</span> &nbsp;(definiert, wo \(K - \sin x &gt; 0\))</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 und 04.04.2025 · a i</span>\(y' = \sin x\cdot e^{-2y}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(e^{2y}\,dy = \sin x\,dx \;\Rightarrow\; \tfrac12 e^{2y} = -\cos x + C \;\Rightarrow\; e^{2y} = K - 2\cos x\) &nbsp;(\(K = 2C\))</p>
+      <p><span class="result">\(y = \tfrac12\ln(K - 2\cos x)\)</span></p>
+      <p class="muted">Ganz ähnlich 21.06.2024 a i: \(y' = \cos x\,e^{2y}\) ergibt \(y = -\tfrac12\ln(K - 2\sin x)\).</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · a i</span>\(y' = 3\,e^{x + y}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Erst zerlegen: \(e^{x+y} = e^x\cdot e^y\). Dann \(e^{-y}\,dy = 3e^x\,dx \;\Rightarrow\; -e^{-y} = 3e^x + C\).</p>
+      <p>\(e^{-y} = K - 3e^x\), also <span class="result">\(y = -\ln(K - 3e^x)\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">04.04.2025 · a iii</span>\(y' = 2x^2\sqrt{y}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(y^{-1/2}\,dy = 2x^2\,dx \;\Rightarrow\; 2\sqrt y = \tfrac{2}{3}x^3 + C \;\Rightarrow\; \sqrt y = \tfrac{x^3}{3} + K\)</p>
+      <p><span class="result">\(y = \left(\tfrac{x^3}{3} + K\right)^2\)</span>, gültig wo \(\tfrac{x^3}{3} + K \ge 0\) (weil \(\sqrt y \ge 0\)). Dazu die konstante Lösung \(y = 0\).</p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · a iii</span>\(y' = \dfrac{x}{\tan y}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\tan y\,dy = x\,dx\). Links logarithmische Integration: \(\int\frac{\sin y}{\cos y}dy = -\ln|\cos y|\) (Zähler ist bis aufs Vorzeichen die Ableitung des Nenners).</p>
+      <p>\(-\ln|\cos y| = \tfrac{x^2}{2} + C \;\Rightarrow\; \cos y = K\,e^{-x^2/2}\)</p>
+      <p><span class="result">\(y = \arccos\left(K\,e^{-x^2/2}\right)\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · a iii · schwer</span>\(\frac1x\,y' = y\,(1 - y^2)\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\dfrac{dy}{y(1-y)(1+y)} = x\,dx\). Partialbrüche: \(\dfrac{1}{y(1-y)(1+y)} = \dfrac{1}{y} + \dfrac{1/2}{1-y} - \dfrac{1/2}{1+y}\) (Nullstellen \(0, 1, -1\) einsetzen).</p>
+      <p>Integrieren: \(\ln|y| - \tfrac12\ln|1-y| - \tfrac12\ln|1+y| = \ln|y| - \tfrac12\ln|1-y^2| = \tfrac{x^2}{2} + C\)</p>
+      <p>Mal 2 und hoch e: \(\dfrac{y^2}{1-y^2} = K\,e^{x^2}\), nach \(y^2\) auflösen:</p>
+      <p><span class="result">\(y^2 = \dfrac{K\,e^{x^2}}{1 + K\,e^{x^2}}\)</span>. Konstante Lösungen: \(y = 0,\ y = \pm1\).</p>
+    </div>
+  </details>
+
+  <h3>Üben – Anfangswertprobleme aus den alten Klausuren</h3>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2026 · c i</span>\(\dot y = 3t^2(1 + y^2),\quad y(0) = 0\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p class="muted">In der Klausur steht \(3x^2\), gemeint ist \(3t^2\).</p>
+      <p>\(\dfrac{dy}{1+y^2} = 3t^2\,dt \;\Rightarrow\; \arctan y = t^3 + C\). Mit \(y(0) = 0\): \(\arctan 0 = 0 = C\).</p>
+      <p><span class="result">\(y = \tan(t^3)\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · c i</span>\(2y\,y' = 2x\left(y^2 + 1\right),\quad y(0) = 2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\dfrac{2y}{y^2 + 1}\,dy = 2x\,dx\). Links mit \(u = y^2 + 1\) (Zähler = Ableitung des Nenners): \(\ln(y^2+1) = x^2 + C\).</p>
+      <p>\(y^2 + 1 = K\,e^{x^2}\). Mit \(y(0) = 2\): \(5 = K\).</p>
+      <p>\(y^2 = 5e^{x^2} - 1\). Weil \(y(0) = 2 &gt; 0\), nimmst du die positive Wurzel: <span class="result">\(y = \sqrt{5e^{x^2} - 1}\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">04.04.2025 · c i</span>\(\sqrt{x}\cdot y' = y - 2,\quad y(0) = 1\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\dfrac{dy}{y-2} = \dfrac{dx}{\sqrt x} \;\Rightarrow\; \ln|y - 2| = 2\sqrt x + C \;\Rightarrow\; y - 2 = K\,e^{2\sqrt x}\)</p>
+      <p>\(y(0) = 1\): \(1 - 2 = K\cdot e^0\), also \(K = -1\). <span class="result">\(y = 2 - e^{2\sqrt x}\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · c i</span>\(\tan x\cdot y' = 1 + y,\quad y\left(\tfrac{\pi}{2}\right) = 1\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\dfrac{dy}{1+y} = \dfrac{\cos x}{\sin x}\,dx \;\Rightarrow\; \ln|1 + y| = \ln|\sin x| + C \;\Rightarrow\; 1 + y = K\sin x\)</p>
+      <p>\(y(\tfrac\pi2) = 1\): \(2 = K\cdot 1\). <span class="result">\(y = 2\sin x - 1\)</span></p>
+    </div>
+  </details>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 · c i</span>\(y' = (1 - y)\tan x,\quad y(0) = 0\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(\dfrac{dy}{1 - y} = \tan x\,dx \;\Rightarrow\; -\ln|1 - y| = -\ln|\cos x| + C \;\Rightarrow\; 1 - y = K\cos x\)</p>
+      <p>\(y(0) = 0\): \(1 = K\). <span class="result">\(y = 1 - \cos x\)</span></p>
+      <p class="muted">Achtung beim linken Integral: \(\int\frac{dy}{1-y} = -\ln|1-y|\) wegen der inneren Ableitung \(-1\).</p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== 5 LINEAR -->
+<section id="linear">
+  <h2>5 · Lineare DGL 1. Ordnung <span class="tag">2.3 Prüfer</span></h2>
+  <p>Eine lineare DGL erster Ordnung lässt sich immer in die <strong>Normalform</strong> bringen:</p>
+  \[ y' + a\,y = s(x) \qquad a: \text{Koeffizient},\quad s(x): \text{Störfunktion} \]
+  <p>Die Lösung setzt sich aus zwei Teilen zusammen. Das ist das Prinzip, das du auch in Teil 2 wieder brauchst:</p>
+  \[ y = \underbrace{y_h}_{\text{löst } y' + ay = 0} + \underbrace{y_p}_{\text{irgendeine Lösung von } y' + ay = s(x)} \]
+
+  <div class="recipe">
+    <h4>Rezept</h4>
+    <ol>
+      <li><strong>Normalform</strong> herstellen: Faktor vor \(y'\) wegdividieren.</li>
+      <li><strong>Homogene DGL</strong> \(y' + ay = 0\) aufschreiben und lösen: \(y_h = C\,e^{-ax}\).</li>
+      <li><strong>Ansatz für \(y_p\)</strong> nach der Tabelle unten wählen (Typ der rechten Seite).</li>
+      <li><strong>Ansatz ableiten, einsetzen, Koeffizienten vergleichen</strong> und \(A, B, \dots\) bestimmen.</li>
+      <li><strong>Allgemeine Lösung:</strong> \(y = y_h + y_p\).</li>
+      <li><strong>Anfangsbedingung</strong> erst jetzt einsetzen, nicht schon in \(y_h\).</li>
+    </ol>
+  </div>
+
+  <h3>Warum \(y_h = C\,e^{-ax}\)?</h3>
+  <p>Die homogene DGL ist trennbar: \(\frac{dy}{y} = -a\,dx \Rightarrow \ln|y| = -ax + c \Rightarrow y = C\,e^{-ax}\). Das musst du nicht jedes Mal herleiten, aber einmal verstanden haben.</p>
+
+  <h3>Ansatz vom Typ der rechten Seite</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Störfunktion \(s(x)\)</th><th>Ansatz \(y_p\)</th><th>Beispiel</th></tr></thead>
+    <tbody>
+      <tr><td>Konstante \(c\)</td><td>\(A\)</td><td>\(s = 6 \Rightarrow y_p = A\)</td></tr>
+      <tr><td>Polynom vom Grad \(n\)</td><td>vollständiges Polynom vom Grad \(n\)</td><td>\(s = 4x \Rightarrow y_p = Ax + B\)</td></tr>
+      <tr><td>\(c\,e^{bx}\)</td><td>\(A\,e^{bx}\) &nbsp;(falls \(b = -a\): \(A\,x\,e^{bx}\))</td><td>\(s = e^{x} \Rightarrow y_p = Ae^{x}\)</td></tr>
+      <tr><td>\(c_1\sin(\omega x) + c_2\cos(\omega x)\)</td><td>\(A\sin(\omega x) + B\cos(\omega x)\) – immer beide</td><td>\(s = 2\sin x \Rightarrow y_p = A\sin x + B\cos x\)</td></tr>
+      <tr><td>Summe</td><td>Summe der Ansätze</td><td>\(s = 3 + e^{2x} \Rightarrow y_p = A + Be^{2x}\)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="trap">
+    <h4>Typische Fehler</h4>
+    <ul>
+      <li>Polynom-Ansatz unvollständig: Für \(4x\) reicht \(Ax\) nicht, es muss \(Ax + B\) sein.</li>
+      <li>Bei \(\sin\) nur \(A\sin\) angesetzt. Ableiten macht aus \(\sin\) einen \(\cos\), deshalb braucht man beide.</li>
+      <li>Anfangsbedingung schon in \(y_h\) eingesetzt statt in die Gesamtlösung \(y_h + y_p\).</li>
+      <li>Störfunktion ist die Lösung der homogenen DGL (\(b = -a\)): Dann liefert der normale Ansatz \(0 = s\). Lösung: mit \(x\) multiplizieren.</li>
+    </ul>
+  </div>
+
+  <h3>Beispiel 1 aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">\(y' + 2y = 6\)</div>
+    <div class="step"><span class="n">a</span><div><strong>Homogene DGL:</strong> \(y' + 2y = 0\)</div></div>
+    <div class="step"><span class="n">b</span><div><strong>Homogene Lösung:</strong> \(a = 2\), also \(y_h = C\,e^{-2x}\)</div></div>
+    <div class="step"><span class="n">c</span><div><strong>Ansatz:</strong> Störfunktion ist konstant, also \(y_p = A\) und \(y_p' = 0\).</div></div>
+    <div class="step"><span class="n">d</span><div><strong>Einsetzen:</strong> \(0 + 2A = 6 \Rightarrow A = 3\), also \(y_p = 3\).</div></div>
+    <div class="step"><span class="n">e</span><div><strong>Allgemeine Lösung:</strong> <span class="result">\(y = C\,e^{-2x} + 3\)</span></div></div>
+    <p class="muted">Gegenprobe mit Trennung: \(y' = 6 - 2y = -2(y - 3)\) ergibt \(\frac{dy}{y-3} = -2\,dx\), also \(y - 3 = Ce^{-2x}\). Dasselbe Ergebnis.</p>
+  </div>
+
+  <h3>Beispiel 2 aus dem Anforderungsdokument</h3>
+  <div class="worked">
+    <div class="src">\(y' + 2y = 4x,\quad y(0) = 1\)</div>
+    <div class="two">
+      <div>
+        <div class="step"><span class="n">1</span><div>\(y_h = C\,e^{-2x}\) (wie oben)</div></div>
+        <div class="step"><span class="n">2</span><div><strong>Ansatz</strong> Polynom Grad 1: \(y_p = Ax + B\), \(y_p' = A\)</div></div>
+        <div class="step"><span class="n">3</span><div><strong>Einsetzen:</strong> \(A + 2(Ax + B) = 4x \iff 2A\,x + (A + 2B) = 4x + 0\)</div></div>
+        <div class="step"><span class="n">4</span><div><strong>Koeffizientenvergleich:</strong><br>bei \(x\): \(2A = 4 \Rightarrow A = 2\)<br>konstant: \(A + 2B = 0 \Rightarrow B = -1\)<br>Also \(y_p = 2x - 1\).</div></div>
+        <div class="step"><span class="n">5</span><div><strong>Allgemein:</strong> \(y = C\,e^{-2x} + 2x - 1\)</div></div>
+        <div class="step"><span class="n">6</span><div><strong>AWP:</strong> \(y(0) = C - 1 = 1 \Rightarrow C = 2\)
+          <p><span class="result">\(y = 2e^{-2x} + 2x - 1\)</span></p></div></div>
+      </div>
+      <figure>
+        <svg id="lin-plot" viewBox="0 0 520 300" role="img" aria-label="Lösung von y' + 2y = 4x zum gewählten Anfangswert"></svg>
+        <div class="slider"><label for="y0">Anfangswert y(0) =</label><input id="y0" type="range" min="-3" max="5" step="0.5" value="1"><output id="y0-out" for="y0">1</output></div>
+        <div class="legend curves"><span class="lspec">\(y = C e^{-2x} + 2x - 1\)</span><span class="lasym">\(y_p = 2x - 1\)</span></div>
+        <figcaption id="lin-cap">Verschieb den Anfangswert: \(C = y(0) + 1\). Jede Lösung nähert sich der Geraden \(y_p\), weil \(e^{-2x}\) abklingt.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <h3>Üben</h3>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung · Exponentialfunktion</span>\(y' + 3y = e^{x}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(y_h = Ce^{-3x}\). Ansatz \(y_p = Ae^{x}\), \(y_p' = Ae^x\): \(Ae^x + 3Ae^x = e^x \Rightarrow 4A = 1\).</p>
+      <p><span class="result">\(y = Ce^{-3x} + \tfrac14e^{x}\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung · Polynom Grad 2</span>\(y' - 3y = 9x^2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(y_h = Ce^{3x}\) (Achtung: \(a = -3\)). Ansatz \(y_p = Ax^2 + Bx + D\), \(y_p' = 2Ax + B\).</p>
+      <p>\(2Ax + B - 3Ax^2 - 3Bx - 3D = 9x^2\). Vergleich: \(x^2\): \(-3A = 9 \Rightarrow A = -3\). \(x\): \(2A - 3B = 0 \Rightarrow B = -2\). konstant: \(B - 3D = 0 \Rightarrow D = -\tfrac23\).</p>
+      <p><span class="result">\(y = Ce^{3x} - 3x^2 - 2x - \tfrac23\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung · harmonisch</span>\(y' + y = 2\sin x\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(y_h = Ce^{-x}\). Ansatz \(y_p = A\sin x + B\cos x\), \(y_p' = A\cos x - B\sin x\).</p>
+      <p>Einsetzen und sortieren: \((A - B)\sin x + (A + B)\cos x = 2\sin x\). Also \(A - B = 2\) und \(A + B = 0\), d. h. \(A = 1,\ B = -1\).</p>
+      <p><span class="result">\(y = Ce^{-x} + \sin x - \cos x\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">Übung · Sonderfall</span>\(y' + 2y = e^{-2x}\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>\(y_h = Ce^{-2x}\). Die Störfunktion hat dieselbe Form wie \(y_h\). Der Ansatz \(Ae^{-2x}\) ergibt \(0 = e^{-2x}\) und scheitert.</p>
+      <p>Deshalb \(y_p = A\,x\,e^{-2x}\), \(y_p' = Ae^{-2x} - 2Axe^{-2x}\). Einsetzen: \(Ae^{-2x} = e^{-2x} \Rightarrow A = 1\).</p>
+      <p><span class="result">\(y = (x + C)\,e^{-2x}\)</span></p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">21.06.2024 · a ii</span>\(2y' + x\,y = 6x\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Normalform: \(y' + \tfrac{x}{2}y = 3x\). Der Koeffizient hängt von \(x\) ab, aber die DGL ist auch trennbar: \(y' = \tfrac{x}{2}(6 - y)\).</p>
+      <p>\(\dfrac{dy}{6 - y} = \tfrac{x}{2}dx \Rightarrow -\ln|6 - y| = \tfrac{x^2}{4} + c \Rightarrow 6 - y = Ke^{-x^2/4}\)</p>
+      <p><span class="result">\(y = 6 + C\,e^{-x^2/4}\)</span>. Kurzer Weg: \(y_p = 6\) sieht man durch Hinschauen (\(0 + \tfrac x2\cdot 6 = 3x\) ✓).</p>
+    </div>
+  </details>
+
+  <div class="card">
+    <h4 style="margin-top:0">Anwendung aus der E-Technik: Kondensator laden</h4>
+    <div class="two">
+      <div>
+        <p>Reihenschaltung aus \(R\) und \(C\) an Gleichspannung \(U_0\): \(RC\,\dot u + u = U_0\), \(u(0) = 0\).</p>
+        <p>Normalform \(\dot u + \frac{1}{\tau}u = \frac{U_0}{\tau}\) mit \(\tau = RC\). Dann \(u_h = Ke^{-t/\tau}\), \(u_p = U_0\) (Konstante), \(u(0) = K + U_0 = 0\).</p>
+        <p><span class="result">\(u(t) = U_0\left(1 - e^{-t/\tau}\right)\)</span></p>
+        <p class="muted">Genau das Schema von Beispiel 1, nur mit anderen Buchstaben.</p>
+      </div>
+      <figure>{{SVG_FAM_RC}}<figcaption>Nach einer Zeitkonstante τ ist der Kondensator zu 63 % geladen.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== 6 VARIATION -->
+<section id="variation">
+  <h2>6 · Variation der Konstanten <span class="tag">Zusatz aus dem alten Stoff</span></h2>
+  <p>Der neue Prüfer nennt nur den Ansatz vom Typ der rechten Seite. In den alten Klausuren kamen aber oft lineare DGL wie \(x\,y' - y = x^2\) vor, deren Koeffizient von \(x\) abhängt. Dann klappt der Tabellen-Ansatz nicht zuverlässig, und dieses Verfahren hilft. Es funktioniert bei <em>jeder</em> linearen DGL 1. Ordnung.</p>
+
+  <div class="recipe">
+    <h4>Rezept</h4>
+    <ol>
+      <li>Normalform \(y' + a(x)\,y = s(x)\).</li>
+      <li>Homogene DGL durch Trennung lösen: \(y_h = C\cdot h(x)\) mit \(h(x) = e^{-\int a(x)dx}\).</li>
+      <li>Konstante „variieren“: \(y = C(x)\cdot h(x)\) ansetzen und einsetzen. Die Terme ohne \(C'\) heben sich immer weg (gute Kontrolle!). Übrig bleibt \(C'(x)\cdot h(x) = s(x)\).</li>
+      <li>\(C(x) = \int\frac{s(x)}{h(x)}dx + K\).</li>
+      <li>\(y = C(x)\cdot h(x)\).</li>
+    </ol>
+  </div>
+
+  <div class="worked">
+    <div class="src">04.04.2025 · a ii: \(x\,y' - y = x^2\)</div>
+    <div class="step"><span class="n">1</span><div>Normalform: \(y' - \frac1x y = x\)</div></div>
+    <div class="step"><span class="n">2</span><div>Homogen: \(\frac{dy}{y} = \frac{dx}{x} \Rightarrow \ln|y| = \ln|x| + c \Rightarrow y_h = C\,x\)</div></div>
+    <div class="step"><span class="n">3</span><div>\(y = C(x)\,x\), \(\ y' = C'x + C\). Einsetzen: \(C'x + C - \frac1x\,C\,x = C'x = x\)</div></div>
+    <div class="step"><span class="n">4</span><div>\(C' = 1 \Rightarrow C(x) = x + K\)</div></div>
+    <p><span class="result">\(y = (x + K)\,x = x^2 + Kx\)</span></p>
+  </div>
+
+  <details class="ex">
+    <summary><span class="q"><span class="src">11.12.2024 · a ii</span>\(x\,y' + y = x + 2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Normalform \(y' + \frac1x y = 1 + \frac2x\). Homogen: \(y_h = \frac{C}{x}\).</p>
+      <p>\(y = \frac{C(x)}{x}\) einsetzen: \(\frac{C'}{x} = 1 + \frac2x \Rightarrow C' = x + 2 \Rightarrow C = \frac{x^2}{2} + 2x + K\).</p>
+      <p><span class="result">\(y = \frac{x}{2} + 2 + \frac{K}{x}\)</span></p>
+      <p class="muted">Abkürzung: Die linke Seite ist \((x\,y)'\) (Produktregel), also gleich integrieren.</p>
+    </div>
+  </details>
+  <details class="ex">
+    <summary><span class="q"><span class="src">28.03.2024 · a ii</span>\(x\,y' - y = x + 2\)</span><span class="btn">Lösung</span></summary>
+    <div class="sol">
+      <p>Normalform \(y' - \frac1x y = 1 + \frac2x\). Homogen: \(y_h = Cx\).</p>
+      <p>\(C'x = 1 + \frac2x \Rightarrow C' = \frac1x + \frac{2}{x^2} \Rightarrow C = \ln|x| - \frac2x + K\).</p>
+      <p><span class="result">\(y = x\ln|x| - 2 + Kx\)</span></p>
+    </div>
+  </details>
+</section>
+
+<!-- ===================================================== 7 MISCHTRAINING -->
+<section id="mischtraining">
+  <h2>7 · Mischtraining: Verfahren erkennen</h2>
+  <p>Erst entscheiden, dann aufklappen. Das Erkennen ist in der Klausur der halbe Weg.</p>
+
+  <details class="ex"><summary><span class="q">\(y' = x\,y^2\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>Nichtlinear, aber trennbar: \(f(x) = x,\ g(y) = y^2\). → <a href="#trennung">Abschnitt 4</a></p></div></details>
+  <details class="ex"><summary><span class="q">\(y' = x + y\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>Nicht trennbar (Summe), aber linear: \(y' - y = x\). \(y_h = Ce^x\), Ansatz \(y_p = Ax + B\) ergibt \(A = -1,\ B = -1\). <span class="result">\(y = Ce^x - x - 1\)</span></p></div></details>
+  <details class="ex"><summary><span class="q">\(y' + 4y = 8\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>Linear mit konstantem Koeffizienten und konstanter Störfunktion. Geht auch per Trennung. <span class="result">\(y = Ce^{-4x} + 2\)</span></p></div></details>
+  <details class="ex"><summary><span class="q">\(x\,y' - y = x^2\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>Linear, Koeffizient hängt von \(x\) ab → <a href="#variation">Variation der Konstanten</a>.</p></div></details>
+  <details class="ex"><summary><span class="q">\(y' = 3\,e^{x + y}\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>Nichtlinear, trennbar nach Zerlegen \(e^{x+y} = e^x e^y\).</p></div></details>
+  <details class="ex"><summary><span class="q">\(x^2y' + y^2 = x\,y\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>Nichtlinear (\(y^2\)) und nicht trennbar. Das ist eine Bernoulli-DGL, sie steht nicht im neuen Anforderungsdokument.</p></div></details>
+  <details class="ex"><summary><span class="q">\(y'' - 5y' + 6y = 0\)</span><span class="btn">Verfahren</span></summary><div class="sol"><p>2. Ordnung, linear, homogen, konstante Koeffizienten → charakteristische Gleichung, <strong>Teil 2</strong>.</p></div></details>
+</section>
+
+<!-- ===================================================== FORMELSAMMLUNG -->
+<section id="formelsammlung">
+  <h2>Baustein für deine zwei A4-Seiten</h2>
+  <p>Zusammen mit dem Komplex-Baustein ist damit etwa eine Seite gefüllt. Die zweite Seite bleibt für Teil 2.</p>
+  <div class="sheet">
+    <h4>Klassifizieren</h4>
+    <p>Ordnung = höchste Ableitung · linear: \(y, y', \dots\) nur in 1. Potenz, nicht in Funktionen, nicht multipliziert · homogen: Störfunktion \(s(x) = 0\)</p>
+    <h4>Trennung der Variablen</h4>
+    <p>\(y' = f(x)\,g(y) \Rightarrow \int\frac{dy}{g(y)} = \int f(x)\,dx + C\) · \(\ln|y| = u + C \Rightarrow y = Ke^{u}\) · \(g(y) = 0\) prüfen</p>
+    <h4>Linear 1. Ordnung</h4>
+    <p>\(y' + ay = s\) · \(y_h = Ce^{-ax}\) · Ansatz: \(c \to A\), Polynom → Polynom gleichen Grades, \(e^{bx} \to Ae^{bx}\) (bei \(b = -a\): \(Axe^{bx}\)), \(\sin/\cos \to A\sin + B\cos\) · \(y = y_h + y_p\), AWP zuletzt</p>
+    <h4>Variation der Konstanten</h4>
+    <p>\(y_h = C\,h(x)\), \(y = C(x)\,h(x)\) einsetzen ⇒ \(C' h = s\) ⇒ \(C = \int\frac{s}{h}dx + K\)</p>
+    <h4>Integrale</h4>
+    <p>\(\int\frac{f'}{f} = \ln|f|\) · \(\int\frac{1}{1+x^2} = \arctan x\) · \(\int\tan x = -\ln|\cos x|\) · \(\int e^{ax} = \frac1ae^{ax}\) · \(\int x^{-1/2} = 2\sqrt x\) · Substitution: \(u = g(x),\ dx = \frac{du}{g'(x)}\)</p>
+  </div>
+</section>
+
+<!-- ===================================================== LERNPLAN -->
+<section id="lernplan">
+  <h2>Lernplan Teil 1</h2>
+  <ul class="checklist" id="plan">
+    <li><input type="checkbox" id="g1"><label for="g1"><strong>Grundbegriffe</strong>: Probe durch Einsetzen an \(y = Ce^{-3x}\) selbst nachrechnen.</label></li>
+    <li><input type="checkbox" id="g2"><label for="g2"><strong>Klassifizieren</strong>: Beispiel a bis d und die acht alten DGL ohne Lösung einordnen.</label></li>
+    <li><input type="checkbox" id="g3"><label for="g3"><strong>Integrale</strong>: Tabelle und die drei Tricks, das Substitutionsbeispiel \(u = 1 + x^2\) selbst rechnen.</label></li>
+    <li><input type="checkbox" id="g4"><label for="g4"><strong>Trennung</strong>: Beispiele 1 und 2, dann die allgemeinen Lösungen aus den alten Klausuren.</label></li>
+    <li><input type="checkbox" id="g5"><label for="g5"><strong>Trennung mit AWP</strong>: die fünf Anfangswertprobleme.</label></li>
+    <li><input type="checkbox" id="g6"><label for="g6"><strong>Linear 1. Ordnung</strong>: Beispiele 1 und 2, dann die vier Übungen inklusive Sonderfall.</label></li>
+    <li><input type="checkbox" id="g7"><label for="g7"><strong>Variation der Konstanten</strong> (optional): die drei alten Klausuraufgaben.</label></li>
+    <li><input type="checkbox" id="g8"><label for="g8"><strong>Mischtraining</strong>: alle sieben DGL nur nach Verfahren einordnen, ohne zu rechnen.</label></li>
+  </ul>
+  <p class="muted">Die Häkchen werden nur in diesem Browser gespeichert. Danach geht es mit Teil 2 (2. Ordnung) weiter.</p>
+</section>
+
+<footer>
+  Grundlage: Anforderungsdokument „Prüfungsvorbereitung – Technische Mathematik am 14.12.2026“ (2.1–2.3), die alten Klausuren vom 28.03.2024, 21.06.2024, 11.12.2024, 04.04.2025, 28.03.2026 und deine Mathe-1-Formelsammlung. Alle Lösungen wurden durch Einsetzen mit einem Computeralgebrasystem geprüft.
+</footer>
+</main>
+
+<script>
+(function () {
+  document.querySelectorAll('#plan input[type=checkbox]').forEach(function (cb) {
+    try { cb.checked = localStorage.getItem('dgl1-' + cb.id) === '1'; } catch (e) {}
+    cb.addEventListener('change', function () {
+      try { localStorage.setItem('dgl1-' + cb.id, cb.checked ? '1' : '0'); } catch (e) {}
+    });
+  });
+
+  var svg = document.getElementById('lin-plot'), slider = document.getElementById('y0'), out = document.getElementById('y0-out');
+  var W = 520, H = 300, pl = 38, pr = 14, pt = 14, pb = 30, x0 = -0.6, x1 = 3, ya = -3, yb = 6;
+  function X(v) { return pl + (v - x0) / (x1 - x0) * (W - pl - pr); }
+  function Y(v) { return pt + (yb - v) / (yb - ya) * (H - pt - pb); }
+  function el(tag, a, txt) { var e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; }
+  function line(f, style) {
+    var p = [];
+    for (var i = 0; i <= 300; i++) { var x = x0 + i * (x1 - x0) / 300, y = f(x); if (isFinite(y)) p.push(X(x).toFixed(1) + ',' + Y(Math.max(ya - 3, Math.min(yb + 3, y))).toFixed(1)); }
+    return el('polyline', { points: p.join(' '), style: style, 'clip-path': 'url(#lin-clip)' });
+  }
+  function draw() {
+    var y0 = parseFloat(slider.value), C = y0 + 1;
+    out.textContent = String(y0).replace('.', ',') + '  →  C = ' + String(C).replace('.', ',');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var defs = el('defs'), cp = el('clipPath', { id: 'lin-clip' });
+    cp.appendChild(el('rect', { x: pl, y: pt, width: W - pl - pr, height: H - pt - pb })); defs.appendChild(cp); svg.appendChild(defs);
+    for (var v = Math.ceil(x0); v <= x1; v++) {
+      svg.appendChild(el('line', { x1: X(v), y1: pt, x2: X(v), y2: H - pb, style: 'stroke:' + (v === 0 ? 'var(--muted)' : 'var(--grid)') }));
+      svg.appendChild(el('text', { x: X(v), y: H - pb + 16, 'text-anchor': 'middle', style: 'fill:var(--muted);font:11px var(--font-mono)' }, String(v)));
+    }
+    for (var w = ya; w <= yb; w++) {
+      svg.appendChild(el('line', { x1: pl, y1: Y(w), x2: W - pr, y2: Y(w), style: 'stroke:' + (w === 0 ? 'var(--muted)' : 'var(--grid)') }));
+      svg.appendChild(el('text', { x: pl - 6, y: Y(w) + 4, 'text-anchor': 'end', style: 'fill:var(--muted);font:11px var(--font-mono)' }, String(w).replace('-', '−')));
+    }
+    svg.appendChild(line(function (x) { return 2 * x - 1; }, 'fill:none;stroke:var(--im);stroke-width:1.4;stroke-dasharray:6 5'));
+    svg.appendChild(line(function (x) { return C * Math.exp(-2 * x) + 2 * x - 1; }, 'fill:none;stroke:var(--re);stroke-width:2.6'));
+    svg.appendChild(el('circle', { cx: X(0), cy: Y(y0), r: 4.5, style: 'fill:var(--im)' }));
+    svg.appendChild(el('text', { x: X(0) + 8, y: Y(y0) - 8, style: 'fill:var(--ink);font:500 12px var(--font-body)' }, 'y(0) = ' + String(y0).replace('.', ',')));
+  }
+  slider.addEventListener('input', draw);
+  draw();
+})();
+</script>
